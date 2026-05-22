@@ -14,8 +14,24 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as DashboardTransactionsRouteImport } from './routes/dashboard.transactions'
+import { Route as DashboardSupportRouteImport } from './routes/dashboard.support'
+import { Route as DashboardSendGiftsRouteImport } from './routes/dashboard.send-gifts'
+import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
+import { Route as DashboardMarketplaceRouteImport } from './routes/dashboard.marketplace'
+import { Route as DashboardFundWalletRouteImport } from './routes/dashboard.fund-wallet'
+import { Route as DashboardCartRouteImport } from './routes/dashboard.cart'
+import { Route as DashboardBuyNumberRouteImport } from './routes/dashboard.buy-number'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminUploadRouteImport } from './routes/admin.upload'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
+import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
+import { Route as AdminApiConfigRouteImport } from './routes/admin.api-config'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -42,6 +58,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -52,14 +73,105 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const DashboardTransactionsRoute = DashboardTransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSupportRoute = DashboardSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSendGiftsRoute = DashboardSendGiftsRouteImport.update({
+  id: '/send-gifts',
+  path: '/send-gifts',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMarketplaceRoute = DashboardMarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardFundWalletRoute = DashboardFundWalletRouteImport.update({
+  id: '/fund-wallet',
+  path: '/fund-wallet',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCartRoute = DashboardCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardBuyNumberRoute = DashboardBuyNumberRouteImport.update({
+  id: '/buy-number',
+  path: '/buy-number',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUploadRoute = AdminUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPricingRoute = AdminPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApiConfigRoute = AdminApiConfigRouteImport.update({
+  id: '/api-config',
+  path: '/api-config',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/api-config': typeof AdminApiConfigRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/pricing': typeof AdminPricingRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/upload': typeof AdminUploadRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/dashboard/buy-number': typeof DashboardBuyNumberRoute
+  '/dashboard/cart': typeof DashboardCartRoute
+  '/dashboard/fund-wallet': typeof DashboardFundWalletRoute
+  '/dashboard/marketplace': typeof DashboardMarketplaceRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/send-gifts': typeof DashboardSendGiftsRoute
+  '/dashboard/support': typeof DashboardSupportRoute
+  '/dashboard/transactions': typeof DashboardTransactionsRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -68,27 +180,74 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/api-config': typeof AdminApiConfigRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/pricing': typeof AdminPricingRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/upload': typeof AdminUploadRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/dashboard/buy-number': typeof DashboardBuyNumberRoute
+  '/dashboard/cart': typeof DashboardCartRoute
+  '/dashboard/fund-wallet': typeof DashboardFundWalletRoute
+  '/dashboard/marketplace': typeof DashboardMarketplaceRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/send-gifts': typeof DashboardSendGiftsRoute
+  '/dashboard/support': typeof DashboardSupportRoute
+  '/dashboard/transactions': typeof DashboardTransactionsRoute
+  '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/api-config': typeof AdminApiConfigRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/pricing': typeof AdminPricingRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/upload': typeof AdminUploadRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/dashboard/buy-number': typeof DashboardBuyNumberRoute
+  '/dashboard/cart': typeof DashboardCartRoute
+  '/dashboard/fund-wallet': typeof DashboardFundWalletRoute
+  '/dashboard/marketplace': typeof DashboardMarketplaceRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/send-gifts': typeof DashboardSendGiftsRoute
+  '/dashboard/support': typeof DashboardSupportRoute
+  '/dashboard/transactions': typeof DashboardTransactionsRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
+    | '/admin/api-config'
+    | '/admin/approvals'
+    | '/admin/pricing'
+    | '/admin/products'
+    | '/admin/upload'
+    | '/admin/users'
+    | '/dashboard/buy-number'
+    | '/dashboard/cart'
+    | '/dashboard/fund-wallet'
+    | '/dashboard/marketplace'
+    | '/dashboard/profile'
+    | '/dashboard/send-gifts'
+    | '/dashboard/support'
+    | '/dashboard/transactions'
+    | '/admin/'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,20 +256,52 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/signup'
+    | '/admin/api-config'
+    | '/admin/approvals'
+    | '/admin/pricing'
+    | '/admin/products'
+    | '/admin/upload'
+    | '/admin/users'
+    | '/dashboard/buy-number'
+    | '/dashboard/cart'
+    | '/dashboard/fund-wallet'
+    | '/dashboard/marketplace'
+    | '/dashboard/profile'
+    | '/dashboard/send-gifts'
+    | '/dashboard/support'
+    | '/dashboard/transactions'
+    | '/admin'
     | '/dashboard'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
+    | '/admin/api-config'
+    | '/admin/approvals'
+    | '/admin/pricing'
+    | '/admin/products'
+    | '/admin/upload'
+    | '/admin/users'
+    | '/dashboard/buy-number'
+    | '/dashboard/cart'
+    | '/dashboard/fund-wallet'
+    | '/dashboard/marketplace'
+    | '/dashboard/profile'
+    | '/dashboard/send-gifts'
+    | '/dashboard/support'
+    | '/dashboard/transactions'
+    | '/admin/'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
@@ -155,6 +346,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -169,14 +367,157 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/dashboard/transactions': {
+      id: '/dashboard/transactions'
+      path: '/transactions'
+      fullPath: '/dashboard/transactions'
+      preLoaderRoute: typeof DashboardTransactionsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/support': {
+      id: '/dashboard/support'
+      path: '/support'
+      fullPath: '/dashboard/support'
+      preLoaderRoute: typeof DashboardSupportRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/send-gifts': {
+      id: '/dashboard/send-gifts'
+      path: '/send-gifts'
+      fullPath: '/dashboard/send-gifts'
+      preLoaderRoute: typeof DashboardSendGiftsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/profile': {
+      id: '/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/marketplace': {
+      id: '/dashboard/marketplace'
+      path: '/marketplace'
+      fullPath: '/dashboard/marketplace'
+      preLoaderRoute: typeof DashboardMarketplaceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/fund-wallet': {
+      id: '/dashboard/fund-wallet'
+      path: '/fund-wallet'
+      fullPath: '/dashboard/fund-wallet'
+      preLoaderRoute: typeof DashboardFundWalletRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/cart': {
+      id: '/dashboard/cart'
+      path: '/cart'
+      fullPath: '/dashboard/cart'
+      preLoaderRoute: typeof DashboardCartRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/buy-number': {
+      id: '/dashboard/buy-number'
+      path: '/buy-number'
+      fullPath: '/dashboard/buy-number'
+      preLoaderRoute: typeof DashboardBuyNumberRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/upload': {
+      id: '/admin/upload'
+      path: '/upload'
+      fullPath: '/admin/upload'
+      preLoaderRoute: typeof AdminUploadRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pricing': {
+      id: '/admin/pricing'
+      path: '/pricing'
+      fullPath: '/admin/pricing'
+      preLoaderRoute: typeof AdminPricingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/approvals': {
+      id: '/admin/approvals'
+      path: '/approvals'
+      fullPath: '/admin/approvals'
+      preLoaderRoute: typeof AdminApprovalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/api-config': {
+      id: '/admin/api-config'
+      path: '/api-config'
+      fullPath: '/admin/api-config'
+      preLoaderRoute: typeof AdminApiConfigRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminApiConfigRoute: typeof AdminApiConfigRoute
+  AdminApprovalsRoute: typeof AdminApprovalsRoute
+  AdminPricingRoute: typeof AdminPricingRoute
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminUploadRoute: typeof AdminUploadRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminApiConfigRoute: AdminApiConfigRoute,
+  AdminApprovalsRoute: AdminApprovalsRoute,
+  AdminPricingRoute: AdminPricingRoute,
+  AdminProductsRoute: AdminProductsRoute,
+  AdminUploadRoute: AdminUploadRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface DashboardRouteChildren {
+  DashboardBuyNumberRoute: typeof DashboardBuyNumberRoute
+  DashboardCartRoute: typeof DashboardCartRoute
+  DashboardFundWalletRoute: typeof DashboardFundWalletRoute
+  DashboardMarketplaceRoute: typeof DashboardMarketplaceRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardSendGiftsRoute: typeof DashboardSendGiftsRoute
+  DashboardSupportRoute: typeof DashboardSupportRoute
+  DashboardTransactionsRoute: typeof DashboardTransactionsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardBuyNumberRoute: DashboardBuyNumberRoute,
+  DashboardCartRoute: DashboardCartRoute,
+  DashboardFundWalletRoute: DashboardFundWalletRoute,
+  DashboardMarketplaceRoute: DashboardMarketplaceRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
+  DashboardSendGiftsRoute: DashboardSendGiftsRoute,
+  DashboardSupportRoute: DashboardSupportRoute,
+  DashboardTransactionsRoute: DashboardTransactionsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -186,6 +527,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
