@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "products bucket public read" ON storage.objects;
