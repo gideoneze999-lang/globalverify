@@ -14,6 +14,167 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      cart_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deposits: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          id: string
+          screenshot_url: string | null
+          status: Database["public"]["Enums"]["deposit_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          id?: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["deposit_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["deposit_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      number_orders: {
+        Row: {
+          country: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          phone: string | null
+          price_ngn: number
+          service: string
+          sim5_order_id: string | null
+          sms: Json | null
+          status: Database["public"]["Enums"]["number_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          phone?: string | null
+          price_ngn: number
+          service: string
+          sim5_order_id?: string | null
+          sms?: Json | null
+          status?: Database["public"]["Enums"]["number_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          phone?: string | null
+          price_ngn?: number
+          service?: string
+          sim5_order_id?: string | null
+          sms?: Json | null
+          status?: Database["public"]["Enums"]["number_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          asset_url: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          price_ngn: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          asset_url?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          price_ngn: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          asset_url?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          price_ngn?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -41,6 +202,36 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           wallet_balance?: number
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          meta: Json | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          meta?: Json | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          meta?: Json | null
+          type?: Database["public"]["Enums"]["transaction_type"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -80,6 +271,19 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      deposit_status: "pending" | "approved" | "rejected"
+      number_status:
+        | "pending"
+        | "received"
+        | "cancelled"
+        | "finished"
+        | "timeout"
+      transaction_type:
+        | "deposit"
+        | "purchase"
+        | "number"
+        | "refund"
+        | "adjustment"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -208,6 +412,21 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      deposit_status: ["pending", "approved", "rejected"],
+      number_status: [
+        "pending",
+        "received",
+        "cancelled",
+        "finished",
+        "timeout",
+      ],
+      transaction_type: [
+        "deposit",
+        "purchase",
+        "number",
+        "refund",
+        "adjustment",
+      ],
     },
   },
 } as const
