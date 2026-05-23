@@ -95,9 +95,10 @@
 
   /* Brand gradients & glows */
   --gradient-primary: linear-gradient(135deg, oklch(0.58 0.22 295), oklch(0.45 0.20 270));
-  --gradient-hero: radial-gradient(ellipse at top, oklch(0.32 0.18 295 / 0.5), transparent 60%),
-                   radial-gradient(ellipse at bottom right, oklch(0.40 0.18 200 / 0.3), transparent 60%),
-                   linear-gradient(180deg, oklch(0.16 0.04 270), oklch(0.13 0.05 275));
+  --gradient-hero: radial-gradient(ellipse at top, oklch(0.95 0.05 295 / 0.35), transparent 55%),
+                   radial-gradient(ellipse at bottom right, oklch(0.92 0.08 200 / 0.30), transparent 60%),
+                   radial-gradient(ellipse at center, oklch(0.98 0.02 270 / 0.10), transparent 70%),
+                   linear-gradient(180deg, oklch(0.28 0.06 275), oklch(0.22 0.06 280));
   --gradient-card: linear-gradient(135deg, oklch(0.24 0.06 280 / 0.7), oklch(0.20 0.05 275 / 0.4));
   --shadow-glow: 0 0 40px oklch(0.58 0.22 295 / 0.35);
   --shadow-cyan: 0 0 30px oklch(0.78 0.15 200 / 0.3);
