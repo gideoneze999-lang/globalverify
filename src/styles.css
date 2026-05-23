@@ -139,7 +139,8 @@
 @layer utilities {
   .font-display {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
   .glass {
     background: var(--gradient-card);
