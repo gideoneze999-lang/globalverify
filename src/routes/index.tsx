@@ -253,16 +253,16 @@ function Footer() {
         <div>
           <h4 className="font-semibold mb-3">Support</h4>
           <ul className="space-y-2 text-muted-foreground">
-            <li><a className="hover:text-foreground" href="#">WhatsApp</a></li>
-            <li><a className="hover:text-foreground" href="#">Telegram</a></li>
-            <li><a className="hover:text-foreground" href="#">Help center</a></li>
+            <li><a className="hover:text-foreground" href="https://wa.me/2349160819483" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+            <li><a className="hover:text-foreground" href="https://t.me/geeupdatecamp" target="_blank" rel="noopener noreferrer">Telegram</a></li>
+            <li><Link to="/dashboard/support" className="hover:text-foreground">Help center</Link></li>
           </ul>
         </div>
         <div>
           <h4 className="font-semibold mb-3">Connect</h4>
           <div className="flex gap-2">
-            <a href="#" className="w-9 h-9 rounded-lg glass grid place-items-center hover:shadow-cyan transition"><MessageCircle className="w-4 h-4" /></a>
-            <a href="#" className="w-9 h-9 rounded-lg glass grid place-items-center hover:shadow-cyan transition"><Send className="w-4 h-4" /></a>
+            <a href="https://wa.me/2349160819483" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="w-9 h-9 rounded-lg glass grid place-items-center hover:shadow-cyan transition"><MessageCircle className="w-4 h-4" /></a>
+            <a href="https://t.me/geeupdatecamp" target="_blank" rel="noopener noreferrer" aria-label="Telegram" className="w-9 h-9 rounded-lg glass grid place-items-center hover:shadow-cyan transition"><Send className="w-4 h-4" /></a>
           </div>
         </div>
       </div>
