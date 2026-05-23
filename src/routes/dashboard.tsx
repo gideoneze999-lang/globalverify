@@ -60,9 +60,7 @@ function DashboardLayout() {
       <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border flex flex-col transition-transform ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
         <div className="h-16 flex items-center justify-between px-5 border-b border-sidebar-border">
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg gradient-primary grid place-items-center shadow-glow">
-              <Shield className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="GlobalVerify logo" width={32} height={32} className="w-8 h-8 object-contain drop-shadow-[0_0_10px_rgba(139,92,246,0.5)]" />
             <span className="font-bold text-sm">Global<span className="text-gradient">Verify</span></span>
           </Link>
           <button className="lg:hidden" onClick={() => setMobileOpen(false)}><X className="w-5 h-5" /></button>
