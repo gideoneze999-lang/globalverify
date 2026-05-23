@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tan
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Shield, LayoutDashboard, Phone, Gift, ShoppingBag, Wallet, ShoppingCart, History, User as UserIcon, Headphones, Menu, X, LogOut } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
