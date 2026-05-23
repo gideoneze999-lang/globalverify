@@ -26,10 +26,8 @@ function Nav() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/50">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg gradient-primary grid place-items-center shadow-glow">
-            <Shield className="w-5 h-5 text-primary-foreground" />
-          </div>
+        <Link to="/" className="flex items-center gap-2.5">
+          <img src={logo} alt="GlobalVerify logo" width={36} height={36} className="w-9 h-9 object-contain drop-shadow-[0_0_12px_rgba(139,92,246,0.45)]" />
           <span className="font-bold text-lg tracking-tight">Global<span className="text-gradient">Verify</span></span>
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
