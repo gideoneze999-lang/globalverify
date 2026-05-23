@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Shield, Zap, Globe2, Lock, CreditCard, Headphones, MessageCircle, Send, Check } from "lucide-react";
 import { useEffect, useState } from "react";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
