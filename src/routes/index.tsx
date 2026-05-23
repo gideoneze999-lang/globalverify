@@ -237,9 +237,7 @@ function Footer() {
       <div className="container mx-auto px-4 sm:px-6 py-14 grid sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm">
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg gradient-primary grid place-items-center">
-              <Shield className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="GlobalVerify logo" width={32} height={32} loading="lazy" className="w-8 h-8 object-contain" />
             <span className="font-bold">GlobalVerify</span>
           </div>
           <p className="text-muted-foreground">Nigeria's premium virtual number & digital services platform.</p>
