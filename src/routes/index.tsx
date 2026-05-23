@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Shield, Zap, Globe2, Lock, CreditCard, Headphones, MessageCircle, Send, Check } from "lucide-react";
 import { useEffect, useState } from "react";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -25,10 +26,8 @@ function Nav() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/50">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg gradient-primary grid place-items-center shadow-glow">
-            <Shield className="w-5 h-5 text-primary-foreground" />
-          </div>
+        <Link to="/" className="flex items-center gap-2.5">
+          <img src={logo} alt="GlobalVerify logo" width={36} height={36} className="w-9 h-9 object-contain drop-shadow-[0_0_12px_rgba(139,92,246,0.45)]" />
           <span className="font-bold text-lg tracking-tight">Global<span className="text-gradient">Verify</span></span>
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
@@ -238,9 +237,7 @@ function Footer() {
       <div className="container mx-auto px-4 sm:px-6 py-14 grid sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm">
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg gradient-primary grid place-items-center">
-              <Shield className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="GlobalVerify logo" width={32} height={32} loading="lazy" className="w-8 h-8 object-contain" />
             <span className="font-bold">GlobalVerify</span>
           </div>
           <p className="text-muted-foreground">Nigeria's premium virtual number & digital services platform.</p>
