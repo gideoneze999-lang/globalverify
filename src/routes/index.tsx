@@ -166,12 +166,12 @@ function OtpMock() {
 
 function Features() {
   const items = [
-    { icon: Zap, title: "Instant delivery", body: "Numbers issued in under 5 seconds." },
-    { icon: Globe2, title: "8 countries", body: "Nigeria, US, UK, Netherlands, Canada, Germany, France, Australia." },
-    { icon: Lock, title: "Secure wallet", body: "Naira balance, encrypted transactions, no card on file." },
-    { icon: Shield, title: "Real numbers", body: "Powered by 5sim — no virtual junk, real OTPs guaranteed." },
-    { icon: CreditCard, title: "Bank transfer", body: "Fund with Moniepoint, get credited within minutes." },
-    { icon: Headphones, title: "24/7 support", body: "WhatsApp & Telegram support whenever you need it." },
+    { icon: Zap, title: "Instant delivery", body: "Numbers issued in under 5 seconds.", color: "bg-amber-500" },
+    { icon: Globe2, title: "8 countries", body: "Nigeria, US, UK, Netherlands, Canada, Germany, France, Australia.", color: "bg-sky-500" },
+    { icon: Lock, title: "Privacy protected", body: "Keep your personal number private. No spam, no unwanted calls.", color: "bg-emerald-500" },
+    { icon: Shield, title: "Real numbers", body: "Powered by 5sim — no virtual junk, real OTPs guaranteed.", color: "bg-violet-500" },
+    { icon: CreditCard, title: "Affordable prices", body: "Premium quality OTP at the cheapest prices. Start from ₦100.", color: "bg-orange-500" },
+    { icon: Headphones, title: "24/7 support", body: "Our support team is always ready to help with any issues.", color: "bg-pink-500" },
   ];
   return (
     <section id="features" className="container mx-auto px-4 sm:px-6 py-24">
@@ -183,8 +183,8 @@ function Features() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {items.map((f) => (
           <div key={f.title} className="glass rounded-2xl p-7 hover:shadow-glow transition-shadow">
-            <div className="w-11 h-11 rounded-xl gradient-primary grid place-items-center mb-4">
-              <f.icon className="w-5 h-5 text-primary-foreground" />
+            <div className={`w-12 h-12 rounded-xl ${f.color} grid place-items-center mb-4 shadow-lg`}>
+              <f.icon className="w-6 h-6 text-white" />
             </div>
             <h3 className="font-semibold text-lg">{f.title}</h3>
             <p className="text-sm text-muted-foreground mt-1.5">{f.body}</p>
@@ -194,6 +194,7 @@ function Features() {
     </section>
   );
 }
+
 
 function HowItWorks() {
   const steps = [
