@@ -1,7 +1,10 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
-import { Shield, LayoutDashboard, Phone, Gift, ShoppingBag, Wallet, ShoppingCart, History, User as UserIcon, Headphones, Menu, X, LogOut } from "lucide-react";
+import { checkIsAdmin } from "@/lib/admin.functions";
+import { LayoutDashboard, Phone, Gift, ShoppingBag, Wallet, ShoppingCart, History, User as UserIcon, Headphones, Menu, X, LogOut, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,16 +16,33 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
-const nav: NavItem[] = [
-  { to: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
-  { to: "/dashboard/buy-number", label: "Buy Number", icon: Phone },
-  { to: "/dashboard/send-gifts", label: "Send Gifts", icon: Gift },
-  { to: "/dashboard/marketplace", label: "Marketplace", icon: ShoppingBag },
-  { to: "/dashboard/fund-wallet", label: "Fund Wallet", icon: Wallet },
-  { to: "/dashboard/cart", label: "Cart", icon: ShoppingCart },
-  { to: "/dashboard/transactions", label: "Transactions", icon: History },
-  { to: "/dashboard/profile", label: "Profile", icon: UserIcon },
-  { to: "/dashboard/support", label: "Support", icon: Headphones },
+
+const groups: { label: string; items: NavItem[] }[] = [
+  {
+    label: "Overview",
+    items: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true }],
+  },
+  {
+    label: "Services",
+    items: [
+      { to: "/dashboard/buy-number", label: "Buy Number", icon: Phone },
+      { to: "/dashboard/send-gifts", label: "Send Gifts", icon: Gift },
+      { to: "/dashboard/marketplace", label: "Marketplace", icon: ShoppingBag },
+      { to: "/dashboard/fund-wallet", label: "Fund Wallet", icon: Wallet },
+      { to: "/dashboard/cart", label: "Cart", icon: ShoppingCart },
+    ],
+  },
+  {
+    label: "History",
+    items: [{ to: "/dashboard/transactions", label: "Transactions", icon: History }],
+  },
+  {
+    label: "Account",
+    items: [
+      { to: "/dashboard/profile", label: "Profile", icon: UserIcon },
+      { to: "/dashboard/support", label: "Support", icon: Headphones },
+    ],
+  },
 ];
 
 function DashboardLayout() {
@@ -30,6 +50,14 @@ function DashboardLayout() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const check = useServerFn(checkIsAdmin);
+
+  const { data: adminData } = useQuery({
+    queryKey: ["isAdmin", session?.user?.id],
+    queryFn: () => check(),
+    enabled: !!session,
+  });
+  const isAdmin = !!adminData?.isAdmin;
 
   useEffect(() => {
     if (!loading && !session) navigate({ to: "/login" });
@@ -65,21 +93,45 @@ function DashboardLayout() {
           </Link>
           <button className="lg:hidden" onClick={() => setMobileOpen(false)}><X className="w-5 h-5" /></button>
         </div>
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {nav.map((n) => (
-            <Link
-              key={n.to}
-              to={n.to}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-                isActive(n.to, n.exact)
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-glow"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-              }`}
-            >
-              <n.icon className="w-4 h-4" />
-              {n.label}
-            </Link>
+        <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+          {groups.map((g) => (
+            <div key={g.label}>
+              <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
+                {g.label}
+              </div>
+              <div className="space-y-1">
+                {g.items.map((n) => (
+                  <Link
+                    key={n.to}
+                    to={n.to}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
+                      isActive(n.to, n.exact)
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-glow"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    }`}
+                  >
+                    <n.icon className="w-4 h-4" />
+                    {n.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
+
+          {isAdmin && (
+            <div>
+              <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-accent/80">
+                Admin
+              </div>
+              <Link
+                to="/admin"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition bg-accent/10 text-accent hover:bg-accent/20 border border-accent/30"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Admin Panel
+              </Link>
+            </div>
+          )}
         </nav>
         <div className="p-3 border-t border-sidebar-border">
           <Button variant="ghost" className="w-full justify-start text-sidebar-foreground/70" onClick={signOut}>
@@ -93,6 +145,11 @@ function DashboardLayout() {
         <header className="lg:hidden sticky top-0 z-30 h-14 flex items-center px-4 bg-background/80 backdrop-blur-xl border-b border-border/50">
           <button onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></button>
           <span className="ml-3 font-semibold">GlobalVerify</span>
+          {isAdmin && (
+            <Link to="/admin" className="ml-auto text-xs text-accent flex items-center gap-1">
+              <ShieldCheck className="w-4 h-4" /> Admin
+            </Link>
+          )}
         </header>
         <main className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
           <Outlet />
