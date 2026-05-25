@@ -121,7 +121,7 @@ export const adminUpdateGiftOrder = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (!isAdmin) throw new Error("Forbidden");
-    const patch: Record<string, unknown> = {};
+    const patch: { status?: "pending" | "processing" | "processed" | "delivered"; admin_note?: string | null } = {};
     if (data.status) patch.status = data.status;
     if (data.admin_note !== undefined) patch.admin_note = data.admin_note;
     const { data: row, error } = await supabaseAdmin
