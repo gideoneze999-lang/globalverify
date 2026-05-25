@@ -7,17 +7,21 @@ const BASE = "https://5sim.net/v1";
 
 async function sim5(path: string, init?: RequestInit) {
   const key = process.env.SIM5_API_KEY;
-  if (!key) throw new Error("5sim API key not configured");
+  if (!key) throw new Error("Number service not configured yet. Please contact support.");
   const res = await fetch(`${BASE}${path}`, {
     ...init,
-    headers: {
-      Authorization: `Bearer ${key}`,
-      Accept: "application/json",
-      ...(init?.headers ?? {}),
-    },
+    headers: { Authorization: `Bearer ${key}`, Accept: "application/json", ...(init?.headers ?? {}) },
   });
   const text = await res.text();
-  if (!res.ok) throw new Error(`5sim error ${res.status}: ${text.slice(0, 200)}`);
+  if (!res.ok) {
+    const low = text.toLowerCase();
+    if (low.includes("no free phones") || low.includes("no number")) throw new Error("No numbers available for this service right now. Try a different country or service.");
+    if (low.includes("not enough") || low.includes("balance")) throw new Error("Provider balance issue — please contact support.");
+    if (res.status === 429) throw new Error("Too many requests — please wait a moment and try again.");
+    if (res.status === 401 || res.status === 403) throw new Error("Number service authentication failed. Please contact support.");
+    if (low.includes("bad country") || low.includes("country")) throw new Error("That country isn't supported for this service.");
+    throw new Error("Couldn't reach the number provider. Please try again in a moment.");
+  }
   try { return JSON.parse(text); } catch { return text; }
 }
 

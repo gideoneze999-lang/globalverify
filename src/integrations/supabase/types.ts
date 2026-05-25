@@ -97,6 +97,57 @@ export type Database = {
         }
         Relationships: []
       }
+      gift_orders: {
+        Row: {
+          admin_note: string | null
+          amount_ngn: number
+          created_at: string
+          delivery_tier: Database["public"]["Enums"]["gift_delivery_tier"]
+          id: string
+          message: string | null
+          product_id: string
+          recipient_email: string | null
+          recipient_name: string
+          recipient_phone: string | null
+          status: Database["public"]["Enums"]["gift_order_status"]
+          tracking_code: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_ngn: number
+          created_at?: string
+          delivery_tier: Database["public"]["Enums"]["gift_delivery_tier"]
+          id?: string
+          message?: string | null
+          product_id: string
+          recipient_email?: string | null
+          recipient_name: string
+          recipient_phone?: string | null
+          status?: Database["public"]["Enums"]["gift_order_status"]
+          tracking_code?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_ngn?: number
+          created_at?: string
+          delivery_tier?: Database["public"]["Enums"]["gift_delivery_tier"]
+          id?: string
+          message?: string | null
+          product_id?: string
+          recipient_email?: string | null
+          recipient_name?: string
+          recipient_phone?: string | null
+          status?: Database["public"]["Enums"]["gift_order_status"]
+          tracking_code?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       number_orders: {
         Row: {
           country: string
@@ -142,8 +193,45 @@ export type Database = {
         }
         Relationships: []
       }
+      product_orders: {
+        Row: {
+          access_link: string | null
+          amount_ngn: number
+          created_at: string
+          id: string
+          product_id: string
+          status: Database["public"]["Enums"]["product_order_status"]
+          tracking_code: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_link?: string | null
+          amount_ngn: number
+          created_at?: string
+          id?: string
+          product_id: string
+          status?: Database["public"]["Enums"]["product_order_status"]
+          tracking_code?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_link?: string | null
+          amount_ngn?: number
+          created_at?: string
+          id?: string
+          product_id?: string
+          status?: Database["public"]["Enums"]["product_order_status"]
+          tracking_code?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
+          access_link: string | null
           asset_url: string | null
           category: string
           created_at: string
@@ -154,6 +242,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_link?: string | null
           asset_url?: string | null
           category: string
           created_at?: string
@@ -164,6 +253,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_link?: string | null
           asset_url?: string | null
           category?: string
           created_at?: string
@@ -272,12 +362,15 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       deposit_status: "pending" | "approved" | "rejected"
+      gift_delivery_tier: "same_day" | "next_day" | "within_week"
+      gift_order_status: "pending" | "processing" | "processed" | "delivered"
       number_status:
         | "pending"
         | "received"
         | "cancelled"
         | "finished"
         | "timeout"
+      product_order_status: "pending" | "delivered"
       transaction_type:
         | "deposit"
         | "purchase"
@@ -413,6 +506,8 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       deposit_status: ["pending", "approved", "rejected"],
+      gift_delivery_tier: ["same_day", "next_day", "within_week"],
+      gift_order_status: ["pending", "processing", "processed", "delivered"],
       number_status: [
         "pending",
         "received",
@@ -420,6 +515,7 @@ export const Constants = {
         "finished",
         "timeout",
       ],
+      product_order_status: ["pending", "delivered"],
       transaction_type: [
         "deposit",
         "purchase",

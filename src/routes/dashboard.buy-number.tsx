@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listCountries, listServices, buyNumber, listMyNumbers, checkOrder, cancelOrder } from "@/lib/numbers.functions";
@@ -40,6 +40,23 @@ function BuyNumber() {
     onSuccess: () => { toast.success("Cancelled & refunded"); qc.invalidateQueries({ queryKey: ["my-numbers"] }); qc.invalidateQueries({ queryKey: ["profile"] }); },
     onError: (e: any) => toast.error(e.message),
   });
+
+  // Auto-cancel pending orders after 10 minutes if no SMS received
+  const autoCancelled = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!myNumbers) return;
+    for (const n of myNumbers as any[]) {
+      if (n.status !== "pending" || autoCancelled.current.has(n.id)) continue;
+      const hasSms = Array.isArray(n.sms) && n.sms.length > 0;
+      if (hasSms) continue;
+      const ageMs = Date.now() - new Date(n.created_at).getTime();
+      if (ageMs >= 10 * 60 * 1000) {
+        autoCancelled.current.add(n.id);
+        cancelMut.mutate(n.id);
+        toast.info(`Number ${n.phone ?? ""} auto-refunded — no code in 10 minutes`);
+      }
+    }
+  }, [myNumbers, cancelMut]);
 
   const filtered = (services ?? []).filter((s) => s.service.toLowerCase().includes(search.toLowerCase()));
 
@@ -128,12 +145,19 @@ function BuyNumber() {
                     )}
                   </div>
                 </div>
+                {n.status === "pending" && (!Array.isArray(n.sms) || n.sms.length === 0) && (
+                  <div className="mt-3 rounded-md bg-background/50 border border-dashed border-border p-3 text-sm">
+                    <div className="text-xs text-accent uppercase tracking-wider">Waiting for code…</div>
+                    <div className="font-mono text-muted-foreground mt-1">SMS will appear here. Auto-refund if none in 10 min.</div>
+                  </div>
+                )}
                 {Array.isArray(n.sms) && n.sms.length > 0 && (
                   <div className="mt-3 space-y-2">
                     {n.sms.map((s: any, i: number) => (
-                      <div key={i} className="rounded-md bg-background/50 p-3 text-sm">
+                      <div key={i} className="rounded-md bg-accent/10 border border-accent/30 p-3 text-sm">
                         <div className="text-xs text-muted-foreground">{s.sender ?? s.from ?? ""} • {s.date ? new Date(s.date).toLocaleString() : ""}</div>
-                        <div className="font-mono">{s.text ?? s.code ?? ""}</div>
+                        <div className="font-mono text-lg text-accent mt-1">{s.code ?? s.text ?? ""}</div>
+                        {s.code && s.text && <div className="text-xs text-muted-foreground mt-1">{s.text}</div>}
                       </div>
                     ))}
                   </div>

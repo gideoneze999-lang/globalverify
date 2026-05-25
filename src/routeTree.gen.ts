@@ -22,6 +22,7 @@ import { Route as DashboardTransactionsRouteImport } from './routes/dashboard.tr
 import { Route as DashboardSupportRouteImport } from './routes/dashboard.support'
 import { Route as DashboardSendGiftsRouteImport } from './routes/dashboard.send-gifts'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
+import { Route as DashboardOrdersRouteImport } from './routes/dashboard.orders'
 import { Route as DashboardMarketplaceRouteImport } from './routes/dashboard.marketplace'
 import { Route as DashboardFundWalletRouteImport } from './routes/dashboard.fund-wallet'
 import { Route as DashboardCartRouteImport } from './routes/dashboard.cart'
@@ -30,6 +31,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminUploadRouteImport } from './routes/admin.upload'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminApiConfigRouteImport } from './routes/admin.api-config'
 
@@ -98,6 +100,11 @@ const DashboardProfileRoute = DashboardProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardOrdersRoute = DashboardOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardMarketplaceRoute = DashboardMarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
@@ -138,6 +145,11 @@ const AdminPricingRoute = AdminPricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
   id: '/approvals',
   path: '/approvals',
@@ -159,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin/api-config': typeof AdminApiConfigRoute
   '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/upload': typeof AdminUploadRoute
@@ -167,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/cart': typeof DashboardCartRoute
   '/dashboard/fund-wallet': typeof DashboardFundWalletRoute
   '/dashboard/marketplace': typeof DashboardMarketplaceRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/send-gifts': typeof DashboardSendGiftsRoute
   '/dashboard/support': typeof DashboardSupportRoute
@@ -182,6 +196,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin/api-config': typeof AdminApiConfigRoute
   '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/upload': typeof AdminUploadRoute
@@ -190,6 +205,7 @@ export interface FileRoutesByTo {
   '/dashboard/cart': typeof DashboardCartRoute
   '/dashboard/fund-wallet': typeof DashboardFundWalletRoute
   '/dashboard/marketplace': typeof DashboardMarketplaceRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/send-gifts': typeof DashboardSendGiftsRoute
   '/dashboard/support': typeof DashboardSupportRoute
@@ -208,6 +224,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/admin/api-config': typeof AdminApiConfigRoute
   '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/upload': typeof AdminUploadRoute
@@ -216,6 +233,7 @@ export interface FileRoutesById {
   '/dashboard/cart': typeof DashboardCartRoute
   '/dashboard/fund-wallet': typeof DashboardFundWalletRoute
   '/dashboard/marketplace': typeof DashboardMarketplaceRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/send-gifts': typeof DashboardSendGiftsRoute
   '/dashboard/support': typeof DashboardSupportRoute
@@ -235,6 +253,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/api-config'
     | '/admin/approvals'
+    | '/admin/orders'
     | '/admin/pricing'
     | '/admin/products'
     | '/admin/upload'
@@ -243,6 +262,7 @@ export interface FileRouteTypes {
     | '/dashboard/cart'
     | '/dashboard/fund-wallet'
     | '/dashboard/marketplace'
+    | '/dashboard/orders'
     | '/dashboard/profile'
     | '/dashboard/send-gifts'
     | '/dashboard/support'
@@ -258,6 +278,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/api-config'
     | '/admin/approvals'
+    | '/admin/orders'
     | '/admin/pricing'
     | '/admin/products'
     | '/admin/upload'
@@ -266,6 +287,7 @@ export interface FileRouteTypes {
     | '/dashboard/cart'
     | '/dashboard/fund-wallet'
     | '/dashboard/marketplace'
+    | '/dashboard/orders'
     | '/dashboard/profile'
     | '/dashboard/send-gifts'
     | '/dashboard/support'
@@ -283,6 +305,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/api-config'
     | '/admin/approvals'
+    | '/admin/orders'
     | '/admin/pricing'
     | '/admin/products'
     | '/admin/upload'
@@ -291,6 +314,7 @@ export interface FileRouteTypes {
     | '/dashboard/cart'
     | '/dashboard/fund-wallet'
     | '/dashboard/marketplace'
+    | '/dashboard/orders'
     | '/dashboard/profile'
     | '/dashboard/send-gifts'
     | '/dashboard/support'
@@ -402,6 +426,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProfileRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/orders': {
+      id: '/dashboard/orders'
+      path: '/orders'
+      fullPath: '/dashboard/orders'
+      preLoaderRoute: typeof DashboardOrdersRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/marketplace': {
       id: '/dashboard/marketplace'
       path: '/marketplace'
@@ -458,6 +489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPricingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/approvals': {
       id: '/admin/approvals'
       path: '/approvals'
@@ -478,6 +516,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminApiConfigRoute: typeof AdminApiConfigRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   AdminPricingRoute: typeof AdminPricingRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminUploadRoute: typeof AdminUploadRoute
@@ -488,6 +527,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminApiConfigRoute: AdminApiConfigRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   AdminPricingRoute: AdminPricingRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminUploadRoute: AdminUploadRoute,
@@ -502,6 +542,7 @@ interface DashboardRouteChildren {
   DashboardCartRoute: typeof DashboardCartRoute
   DashboardFundWalletRoute: typeof DashboardFundWalletRoute
   DashboardMarketplaceRoute: typeof DashboardMarketplaceRoute
+  DashboardOrdersRoute: typeof DashboardOrdersRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardSendGiftsRoute: typeof DashboardSendGiftsRoute
   DashboardSupportRoute: typeof DashboardSupportRoute
@@ -514,6 +555,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardCartRoute: DashboardCartRoute,
   DashboardFundWalletRoute: DashboardFundWalletRoute,
   DashboardMarketplaceRoute: DashboardMarketplaceRoute,
+  DashboardOrdersRoute: DashboardOrdersRoute,
   DashboardProfileRoute: DashboardProfileRoute,
   DashboardSendGiftsRoute: DashboardSendGiftsRoute,
   DashboardSupportRoute: DashboardSupportRoute,
