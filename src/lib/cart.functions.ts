@@ -41,21 +41,12 @@ export const removeFromCart = createServerFn({ method: "POST" })
 
 export const checkout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z.object({
-      shipping: z.object({
-        full_name: z.string().min(1).max(120),
-        phone: z.string().min(1).max(40),
-        address: z.string().min(1).max(400),
-        city: z.string().min(1).max(120),
-        state: z.string().min(1).max(120),
-      }),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ context }) => {
     const userId = context.userId;
     const { data: items, error } = await supabaseAdmin
-      .from("cart_items").select("id, quantity, product:products(id,title,price_ngn)").eq("user_id", userId);
+      .from("cart_items")
+      .select("id, quantity, product:products(id,title,price_ngn,access_link)")
+      .eq("user_id", userId);
     if (error) throw new Error(error.message);
     if (!items || !items.length) throw new Error("Cart is empty");
 
@@ -65,11 +56,28 @@ export const checkout = createServerFn({ method: "POST" })
     if (bal < total) throw new Error("Insufficient wallet balance");
 
     await supabaseAdmin.from("profiles").update({ wallet_balance: bal - total }).eq("id", userId);
+
+    // Create one product_order per cart line, snapshotting the access link
+    const orderRows = items.flatMap((it: any) =>
+      Array.from({ length: it.quantity }).map(() => ({
+        user_id: userId,
+        product_id: it.product.id,
+        amount_ngn: Number(it.product.price_ngn),
+        access_link: it.product.access_link ?? null,
+        status: "delivered" as const,
+      })),
+    );
+    const { data: createdOrders } = await supabaseAdmin
+      .from("product_orders").insert(orderRows).select("id, tracking_code, product_id, access_link");
+
     await supabaseAdmin.from("transactions").insert({
       user_id: userId, type: "purchase", amount: -total,
       description: `Marketplace purchase (${items.length} item${items.length > 1 ? "s" : ""})`,
-      meta: { items: items.map((i: any) => ({ id: i.product.id, title: i.product.title, qty: i.quantity, price: i.product.price_ngn })), shipping: data.shipping },
+      meta: {
+        items: items.map((i: any) => ({ id: i.product.id, title: i.product.title, qty: i.quantity, price: i.product.price_ngn })),
+        order_ids: createdOrders?.map((o) => o.id) ?? [],
+      },
     });
     await supabaseAdmin.from("cart_items").delete().eq("user_id", userId);
-    return { ok: true, total };
+    return { ok: true, total, orders: createdOrders ?? [] };
   });

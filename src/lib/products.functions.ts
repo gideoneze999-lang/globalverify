@@ -28,6 +28,7 @@ export const createProduct = createServerFn({ method: "POST" })
       category: z.string().min(1).max(80),
       description: z.string().max(2000).optional().nullable(),
       asset_url: z.string().url().optional().nullable(),
+      access_link: z.string().url().max(2000).optional().nullable(),
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
