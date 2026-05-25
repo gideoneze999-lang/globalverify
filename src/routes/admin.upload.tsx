@@ -24,7 +24,7 @@ function fileToBase64(f: File): Promise<string> {
 function Upload() {
   const createFn = useServerFn(createProduct);
   const uploadFn = useServerFn(uploadProductAsset);
-  const [form, setForm] = useState({ title: "", price_ngn: "", category: "media", description: "" });
+  const [form, setForm] = useState({ title: "", price_ngn: "", category: "media", description: "", access_link: "" });
   const [file, setFile] = useState<File | null>(null);
 
   const mut = useMutation({
@@ -38,11 +38,12 @@ function Upload() {
       return createFn({ data: {
         title: form.title, price_ngn: Number(form.price_ngn), category: form.category,
         description: form.description || null, asset_url,
+        access_link: form.access_link?.trim() || null,
       } });
     },
     onSuccess: () => {
       toast.success("Product created");
-      setForm({ title: "", price_ngn: "", category: form.category, description: "" });
+      setForm({ title: "", price_ngn: "", category: form.category, description: "", access_link: "" });
       setFile(null);
     },
     onError: (e: any) => toast.error(e.message),
@@ -69,6 +70,16 @@ function Upload() {
           <div><Label>Image</Label><Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></div>
         </div>
         <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+        <div>
+          <Label>Product access link (delivered to buyer after payment)</Label>
+          <Input
+            type="url"
+            placeholder="https://drive.google.com/… or https://your-product-link"
+            value={form.access_link}
+            onChange={(e) => setForm({ ...form, access_link: e.target.value })}
+          />
+          <p className="text-xs text-muted-foreground mt-1">Only users who purchase this product will see this link on their My Orders page.</p>
+        </div>
         <Button type="submit" className="gradient-primary shadow-glow" disabled={mut.isPending}>
           {mut.isPending ? "Saving…" : "Create product"}
         </Button>
