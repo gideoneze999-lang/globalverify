@@ -59,19 +59,19 @@ function OverviewPage() {
       {/* Welcome */}
       <div>
         <p className="text-xs text-accent uppercase tracking-widest">Dashboard</p>
-        <h1 className="font-display text-3xl md:text-4xl mt-1">
+        <h1 className="font-display text-2xl sm:text-3xl md:text-4xl mt-1">
           Welcome{profile?.first_name ? `, ${profile.first_name}` : ""} <span className="text-gradient">back</span>
         </h1>
       </div>
 
       {/* Available Balance hero card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[oklch(0.22_0.06_275)] to-[oklch(0.14_0.04_270)] border border-border/40 p-6 sm:p-8 shadow-glow">
-        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-accent/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[oklch(0.22_0.06_275)] to-[oklch(0.14_0.04_270)] border border-border/40 p-5 sm:p-8 shadow-glow">
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
         <div className="relative">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Wallet className="w-4 h-4 text-accent" /> Available Balance
           </div>
-          <div className="font-display text-5xl sm:text-6xl mt-2 text-white">
+          <div className="font-display text-3xl sm:text-5xl md:text-6xl mt-2 text-white break-words">
             {formatNGN(balance)}
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
@@ -89,7 +89,7 @@ function OverviewPage() {
       </div>
 
       {/* Stat cards with colored top borders */}
-      <div className="grid sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard icon={Coins} label="Total Spent (Lifetime)" value={formatNGN(txData?.spent ?? 0)} bar="bg-violet-500" iconBg="bg-violet-500/15 text-violet-400" />
         <StatCard icon={Smartphone} label="Numbers Purchased" value={String(txData?.activeNumbers ?? 0)} bar="bg-sky-500" iconBg="bg-sky-500/15 text-sky-400" />
         <StatCard icon={Gift} label="Referral Balance" value={formatNGN(0)} bar="bg-amber-500" iconBg="bg-amber-500/15 text-amber-400" />
