@@ -146,7 +146,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "gift_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       number_orders: {
         Row: {
@@ -227,7 +235,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "product_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -363,7 +379,12 @@ export type Database = {
       app_role: "admin" | "user"
       deposit_status: "pending" | "approved" | "rejected"
       gift_delivery_tier: "same_day" | "next_day" | "within_week"
-      gift_order_status: "pending" | "processing" | "processed" | "delivered"
+      gift_order_status:
+        | "pending"
+        | "processing"
+        | "processed"
+        | "delivered"
+        | "cancelled"
       number_status:
         | "pending"
         | "received"
@@ -507,7 +528,13 @@ export const Constants = {
       app_role: ["admin", "user"],
       deposit_status: ["pending", "approved", "rejected"],
       gift_delivery_tier: ["same_day", "next_day", "within_week"],
-      gift_order_status: ["pending", "processing", "processed", "delivered"],
+      gift_order_status: [
+        "pending",
+        "processing",
+        "processed",
+        "delivered",
+        "cancelled",
+      ],
       number_status: [
         "pending",
         "received",
