@@ -1,23 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Users, CheckSquare, DollarSign, Boxes } from "lucide-react";
+import { adminOverviewStats } from "@/lib/admin.functions";
+import { formatNGN } from "@/lib/format";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminOverview,
 });
 
 function AdminOverview() {
+  const fn = useServerFn(adminOverviewStats);
+  const { data, isLoading } = useQuery({ queryKey: ["admin-overview"], queryFn: () => fn() });
+
   const stats = [
-    { icon: Users, label: "Registered users", value: "—" },
-    { icon: CheckSquare, label: "Pending approvals", value: "0" },
-    { icon: DollarSign, label: "Approved total", value: "₦0" },
-    { icon: Boxes, label: "Products listed", value: "0" },
+    { icon: Users, label: "Registered users", value: data ? String(data.users) : "—" },
+    { icon: CheckSquare, label: "Pending approvals", value: data ? String(data.pending) : "—" },
+    { icon: DollarSign, label: "Approved total", value: data ? formatNGN(data.approvedTotal) : "—" },
+    { icon: Boxes, label: "Products listed", value: data ? String(data.products) : "—" },
   ];
   return (
     <div className="space-y-8">
       <div>
         <p className="text-sm text-accent uppercase tracking-widest">Admin</p>
         <h1 className="font-display text-5xl text-gradient mt-1">Overview</h1>
-        <p className="text-muted-foreground mt-2">Wallet approvals, product catalog, and user management — feature pages land in Phase 2.</p>
+        <p className="text-muted-foreground mt-2">Live snapshot of users, approvals, and catalog.</p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {stats.map((s) => (
@@ -25,7 +32,7 @@ function AdminOverview() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <s.icon className="w-4 h-4 text-accent" /> {s.label}
             </div>
-            <div className="font-display text-4xl text-gradient mt-3">{s.value}</div>
+            <div className="font-display text-4xl text-gradient mt-3">{isLoading ? "…" : s.value}</div>
           </div>
         ))}
       </div>
