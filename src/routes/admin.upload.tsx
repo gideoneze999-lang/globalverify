@@ -24,7 +24,7 @@ function fileToBase64(f: File): Promise<string> {
 function Upload() {
   const createFn = useServerFn(createProduct);
   const uploadFn = useServerFn(uploadProductAsset);
-  const [form, setForm] = useState({ title: "", price_ngn: "", category: "media", description: "", access_link: "" });
+  const [form, setForm] = useState({ title: "", price_ngn: "", category: "media", gift_category: "", description: "", access_link: "" });
   const [file, setFile] = useState<File | null>(null);
 
   const mut = useMutation({
@@ -37,13 +37,14 @@ function Upload() {
       }
       return createFn({ data: {
         title: form.title, price_ngn: Number(form.price_ngn), category: form.category,
+        gift_category: form.category === "gift" ? (form.gift_category?.trim() || null) : null,
         description: form.description || null, asset_url,
         access_link: form.access_link?.trim() || null,
       } });
     },
     onSuccess: () => {
       toast.success("Product created");
-      setForm({ title: "", price_ngn: "", category: form.category, description: "", access_link: "" });
+      setForm({ title: "", price_ngn: "", category: form.category, gift_category: "", description: "", access_link: "" });
       setFile(null);
     },
     onError: (e: any) => toast.error(e.message),
