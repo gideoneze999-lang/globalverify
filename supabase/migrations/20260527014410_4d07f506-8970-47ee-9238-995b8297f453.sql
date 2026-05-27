@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.auto_refund_stale_gift_orders() FROM PUBLIC, anon, authenticated;
