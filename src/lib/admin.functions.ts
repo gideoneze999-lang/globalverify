@@ -49,3 +49,22 @@ export const adjustBalance = createServerFn({ method: "POST" })
     });
     return { newBalance: newBal };
   });
+
+export const adminOverviewStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const [users, pending, approved, products] = await Promise.all([
+      supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }),
+      supabaseAdmin.from("deposits").select("*", { count: "exact", head: true }).eq("status", "pending"),
+      supabaseAdmin.from("deposits").select("amount").eq("status", "approved"),
+      supabaseAdmin.from("products").select("*", { count: "exact", head: true }),
+    ]);
+    const approvedTotal = (approved.data ?? []).reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
+    return {
+      users: users.count ?? 0,
+      pending: pending.count ?? 0,
+      approvedTotal,
+      products: products.count ?? 0,
+    };
+  });
