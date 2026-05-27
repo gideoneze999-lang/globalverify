@@ -24,7 +24,7 @@ function fileToBase64(f: File): Promise<string> {
 function Upload() {
   const createFn = useServerFn(createProduct);
   const uploadFn = useServerFn(uploadProductAsset);
-  const [form, setForm] = useState({ title: "", price_ngn: "", category: "media", description: "", access_link: "" });
+  const [form, setForm] = useState({ title: "", price_ngn: "", category: "media", gift_category: "", description: "", access_link: "" });
   const [file, setFile] = useState<File | null>(null);
 
   const mut = useMutation({
@@ -37,13 +37,14 @@ function Upload() {
       }
       return createFn({ data: {
         title: form.title, price_ngn: Number(form.price_ngn), category: form.category,
+        gift_category: form.category === "gift" ? (form.gift_category?.trim() || null) : null,
         description: form.description || null, asset_url,
         access_link: form.access_link?.trim() || null,
       } });
     },
     onSuccess: () => {
       toast.success("Product created");
-      setForm({ title: "", price_ngn: "", category: form.category, description: "", access_link: "" });
+      setForm({ title: "", price_ngn: "", category: form.category, gift_category: "", description: "", access_link: "" });
       setFile(null);
     },
     onError: (e: any) => toast.error(e.message),
@@ -69,6 +70,19 @@ function Upload() {
           </div>
           <div><Label>Image</Label><Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></div>
         </div>
+        {form.category === "gift" && (
+          <div>
+            <Label>Gift category</Label>
+            <Input
+              required
+              maxLength={80}
+              placeholder='e.g. "Same day delivery", "Cakes", "Flowers", "Fruit basket"'
+              value={form.gift_category}
+              onChange={(e) => setForm({ ...form, gift_category: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground mt-1">This gift will only appear under this single category on the Send Gifts page (and under "All").</p>
+          </div>
+        )}
         <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
         <div>
           <Label>Product access link (delivered to buyer after payment)</Label>

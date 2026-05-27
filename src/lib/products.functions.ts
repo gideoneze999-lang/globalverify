@@ -26,6 +26,7 @@ export const createProduct = createServerFn({ method: "POST" })
       title: z.string().min(1).max(200),
       price_ngn: z.number().min(0).max(100_000_000),
       category: z.string().min(1).max(80),
+      gift_category: z.string().min(1).max(80).optional().nullable(),
       description: z.string().max(2000).optional().nullable(),
       asset_url: z.string().url().optional().nullable(),
       access_link: z.string().url().max(2000).optional().nullable(),

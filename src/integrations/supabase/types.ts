@@ -252,6 +252,7 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          gift_category: string | null
           id: string
           price_ngn: number
           title: string
@@ -263,6 +264,7 @@ export type Database = {
           category: string
           created_at?: string
           description?: string | null
+          gift_category?: string | null
           id?: string
           price_ngn: number
           title: string
@@ -274,6 +276,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          gift_category?: string | null
           id?: string
           price_ngn?: number
           title?: string
