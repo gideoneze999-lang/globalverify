@@ -31,9 +31,15 @@ function BuyNumber() {
 
   const buyMut = useMutation({
     mutationFn: (service: string) => buyFn({ data: { country, service } }),
-    onSuccess: () => { toast.success("Number purchased"); qc.invalidateQueries({ queryKey: ["my-numbers"] }); qc.invalidateQueries({ queryKey: ["profile"] }); },
-    onError: (e: any) => toast.error(e.message),
+    onSuccess: (res: any) => {
+      if (res && res.ok === false) { toast.error(res.error ?? "Purchase failed"); return; }
+      toast.success("Number purchased");
+      qc.invalidateQueries({ queryKey: ["my-numbers"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Purchase failed"),
   });
+
   const checkMut = useMutation({ mutationFn: (id: string) => checkFn({ data: { id } }), onSuccess: () => qc.invalidateQueries({ queryKey: ["my-numbers"] }) });
   const cancelMut = useMutation({
     mutationFn: (id: string) => cancelFn({ data: { id } }),
