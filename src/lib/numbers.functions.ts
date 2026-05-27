@@ -15,8 +15,8 @@ async function sim5(path: string, init?: RequestInit) {
   const text = await res.text();
   if (!res.ok) {
     const low = text.toLowerCase();
-    if (low.includes("no free phones") || low.includes("no number")) throw new Error("No numbers available for this service right now. Try a different country or service.");
-    if (low.includes("not enough") || low.includes("balance")) throw new Error("Provider balance issue — please contact support.");
+    if (low.includes("no free phones") || low.includes("no number") || low.includes("no_free")) throw new Error("No numbers available for this service right now. Try a different country or service.");
+    if (low.includes("not enough") || low.includes("no_balance") || low.includes("user balance")) throw new Error("Number service is temporarily unavailable — our team has been notified. Please try again later or contact support.");
     if (res.status === 429) throw new Error("Too many requests — please wait a moment and try again.");
     if (res.status === 401 || res.status === 403) throw new Error("Number service authentication failed. Please contact support.");
     if (low.includes("bad country") || low.includes("country")) throw new Error("That country isn't supported for this service.");

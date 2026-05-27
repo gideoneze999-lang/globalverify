@@ -367,6 +367,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_refund_stale_gift_orders: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
