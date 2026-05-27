@@ -71,41 +71,47 @@ export const buyNumber = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    // price lookup
-    const raw = await sim5(`/guest/products/${encodeURIComponent(data.country)}/any`);
-    const svc = (raw as any)[data.service];
-    if (!svc || !svc.Price) throw new Error("Service unavailable");
-    const p = await getPricing();
-    const priceNgn = toNgn(Number(svc.Price), p);
+    try {
+      // price lookup
+      const raw = await sim5(`/guest/products/${encodeURIComponent(data.country)}/any`);
+      const svc = (raw as any)[data.service];
+      if (!svc || !svc.Price) return { ok: false as const, error: "Service unavailable" };
+      const p = await getPricing();
+      const priceNgn = toNgn(Number(svc.Price), p);
 
-    // wallet check + debit
-    const { data: profile } = await supabaseAdmin.from("profiles").select("wallet_balance").eq("id", context.userId).single();
-    const bal = Number(profile?.wallet_balance ?? 0);
-    if (bal < priceNgn) throw new Error("Insufficient wallet balance");
+      // wallet check + debit
+      const { data: profile } = await supabaseAdmin.from("profiles").select("wallet_balance").eq("id", context.userId).single();
+      const bal = Number(profile?.wallet_balance ?? 0);
+      if (bal < priceNgn) return { ok: false as const, error: "Insufficient wallet balance" };
 
-    // buy from 5sim
-    const order: any = await sim5(`/user/buy/activation/${encodeURIComponent(data.country)}/any/${encodeURIComponent(data.service)}`);
+      // buy from 5sim
+      const order: any = await sim5(`/user/buy/activation/${encodeURIComponent(data.country)}/any/${encodeURIComponent(data.service)}`);
 
-    await supabaseAdmin.from("profiles").update({ wallet_balance: bal - priceNgn }).eq("id", context.userId);
-    const { data: row, error } = await supabaseAdmin.from("number_orders").insert({
-      user_id: context.userId,
-      sim5_order_id: String(order.id),
-      country: data.country,
-      service: data.service,
-      phone: order.phone,
-      price_ngn: priceNgn,
-      status: "pending",
-      expires_at: order.expires ?? null,
-    }).select().single();
-    if (error) throw new Error(error.message);
+      await supabaseAdmin.from("profiles").update({ wallet_balance: bal - priceNgn }).eq("id", context.userId);
+      const { data: row, error } = await supabaseAdmin.from("number_orders").insert({
+        user_id: context.userId,
+        sim5_order_id: String(order.id),
+        country: data.country,
+        service: data.service,
+        phone: order.phone,
+        price_ngn: priceNgn,
+        status: "pending",
+        expires_at: order.expires ?? null,
+      }).select().single();
+      if (error) return { ok: false as const, error: error.message };
 
-    await supabaseAdmin.from("transactions").insert({
-      user_id: context.userId, type: "number", amount: -priceNgn,
-      description: `Virtual number — ${data.service} (${data.country})`,
-      meta: { order_id: row.id, phone: order.phone, sim5_order_id: String(order.id) },
-    });
-    return row;
+      await supabaseAdmin.from("transactions").insert({
+        user_id: context.userId, type: "number", amount: -priceNgn,
+        description: `Virtual number — ${data.service} (${data.country})`,
+        meta: { order_id: row.id, phone: order.phone, sim5_order_id: String(order.id) },
+      });
+      return { ok: true as const, row };
+    } catch (e: any) {
+      console.error("buyNumber failed:", e?.message ?? e);
+      return { ok: false as const, error: e?.message ?? "Couldn't complete purchase. Please try again." };
+    }
   });
+
 
 export const listMyNumbers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
