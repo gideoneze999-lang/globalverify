@@ -28,6 +28,8 @@ const groups: { label: string; items: NavItem[] }[] = [
       { to: "/dashboard/buy-number", label: "Buy Number", icon: Phone },
       { to: "/dashboard/send-gifts", label: "Send Gifts", icon: Gift },
       { to: "/dashboard/marketplace", label: "Marketplace", icon: ShoppingBag },
+      { to: "/dashboard/bulk-sms", label: "Bulk SMS", icon: MessageSquare },
+      { to: "/dashboard/voice-call", label: "Voice Call", icon: PhoneCall },
       { to: "/dashboard/fund-wallet", label: "Fund Wallet", icon: Wallet },
       { to: "/dashboard/cart", label: "Cart", icon: ShoppingCart },
     ],
