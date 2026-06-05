@@ -32,6 +32,92 @@ export type Database = {
         }
         Relationships: []
       }
+      bulk_sms_jobs: {
+        Row: {
+          created_at: string
+          failed_count: number
+          id: string
+          message: string
+          sent_count: number
+          status: Database["public"]["Enums"]["bulk_sms_status"]
+          total_cost_ngn: number
+          total_recipients: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          failed_count?: number
+          id?: string
+          message: string
+          sent_count?: number
+          status?: Database["public"]["Enums"]["bulk_sms_status"]
+          total_cost_ngn?: number
+          total_recipients?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          failed_count?: number
+          id?: string
+          message?: string
+          sent_count?: number
+          status?: Database["public"]["Enums"]["bulk_sms_status"]
+          total_cost_ngn?: number
+          total_recipients?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bulk_sms_recipients: {
+        Row: {
+          cost_ngn: number
+          country_iso2: string | null
+          created_at: string
+          error: string | null
+          from_phone: string | null
+          id: string
+          job_id: string
+          status: string
+          to_phone: string
+          twilio_sid: string | null
+        }
+        Insert: {
+          cost_ngn?: number
+          country_iso2?: string | null
+          created_at?: string
+          error?: string | null
+          from_phone?: string | null
+          id?: string
+          job_id: string
+          status?: string
+          to_phone: string
+          twilio_sid?: string | null
+        }
+        Update: {
+          cost_ngn?: number
+          country_iso2?: string | null
+          created_at?: string
+          error?: string | null
+          from_phone?: string | null
+          id?: string
+          job_id?: string
+          status?: string
+          to_phone?: string
+          twilio_sid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulk_sms_recipients_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "bulk_sms_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -344,6 +430,39 @@ export type Database = {
         }
         Relationships: []
       }
+      twilio_numbers: {
+        Row: {
+          active: boolean
+          capabilities: Json
+          country_iso2: string
+          created_at: string
+          id: string
+          label: string | null
+          phone_e164: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          capabilities?: Json
+          country_iso2: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          phone_e164: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          capabilities?: Json
+          country_iso2?: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          phone_e164?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -365,6 +484,48 @@ export type Database = {
         }
         Relationships: []
       }
+      voice_calls: {
+        Row: {
+          cost_ngn: number
+          created_at: string
+          error: string | null
+          from_phone: string
+          id: string
+          message: string
+          status: string
+          to_phone: string
+          twilio_sid: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cost_ngn?: number
+          created_at?: string
+          error?: string | null
+          from_phone: string
+          id?: string
+          message: string
+          status?: string
+          to_phone: string
+          twilio_sid?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cost_ngn?: number
+          created_at?: string
+          error?: string | null
+          from_phone?: string
+          id?: string
+          message?: string
+          status?: string
+          to_phone?: string
+          twilio_sid?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -381,6 +542,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      bulk_sms_status:
+        | "pending"
+        | "sending"
+        | "completed"
+        | "failed"
+        | "partial"
       deposit_status: "pending" | "approved" | "rejected"
       gift_delivery_tier: "same_day" | "next_day" | "within_week"
       gift_order_status:
@@ -530,6 +697,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      bulk_sms_status: ["pending", "sending", "completed", "failed", "partial"],
       deposit_status: ["pending", "approved", "rejected"],
       gift_delivery_tier: ["same_day", "next_day", "within_week"],
       gift_order_status: [

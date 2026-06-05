@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { checkIsAdmin } from "@/lib/admin.functions";
-import { LayoutDashboard, Phone, Gift, ShoppingBag, Wallet, ShoppingCart, History, User as UserIcon, Headphones, Menu, X, LogOut, ShieldCheck, Package } from "lucide-react";
+import { LayoutDashboard, Phone, Gift, ShoppingBag, Wallet, ShoppingCart, History, User as UserIcon, Headphones, Menu, X, LogOut, ShieldCheck, Package, MessageSquare, PhoneCall } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,8 @@ const groups: { label: string; items: NavItem[] }[] = [
       { to: "/dashboard/buy-number", label: "Buy Number", icon: Phone },
       { to: "/dashboard/send-gifts", label: "Send Gifts", icon: Gift },
       { to: "/dashboard/marketplace", label: "Marketplace", icon: ShoppingBag },
+      { to: "/dashboard/bulk-sms", label: "Bulk SMS", icon: MessageSquare },
+      { to: "/dashboard/voice-call", label: "Voice Call", icon: PhoneCall },
       { to: "/dashboard/fund-wallet", label: "Fund Wallet", icon: Wallet },
       { to: "/dashboard/cart", label: "Cart", icon: ShoppingCart },
     ],

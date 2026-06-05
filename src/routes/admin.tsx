@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { checkIsAdmin } from "@/lib/admin.functions";
-import { Shield, LayoutDashboard, CheckSquare, Key, DollarSign, UploadCloud, Boxes, Users, LogOut, Menu, X, PackageCheck } from "lucide-react";
+import { Shield, LayoutDashboard, CheckSquare, Key, DollarSign, UploadCloud, Boxes, Users, LogOut, Menu, X, PackageCheck, Phone } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ const nav = [
   { to: "/admin/approvals", label: "Wallet Approvals", icon: CheckSquare },
   { to: "/admin/orders", label: "Orders & Gifts", icon: PackageCheck },
   { to: "/admin/api-config", label: "5sim API Config", icon: Key },
+  { to: "/admin/twilio", label: "Twilio", icon: Phone },
   { to: "/admin/pricing", label: "Pricing Manager", icon: DollarSign },
   { to: "/admin/upload", label: "Upload Product", icon: UploadCloud },
   { to: "/admin/products", label: "Manage Products", icon: Boxes },
