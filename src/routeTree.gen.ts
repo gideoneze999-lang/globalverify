@@ -18,6 +18,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as DashboardVoiceCallRouteImport } from './routes/dashboard.voice-call'
 import { Route as DashboardTransactionsRouteImport } from './routes/dashboard.transactions'
 import { Route as DashboardSupportRouteImport } from './routes/dashboard.support'
 import { Route as DashboardSendGiftsRouteImport } from './routes/dashboard.send-gifts'
@@ -27,8 +28,10 @@ import { Route as DashboardMarketplaceRouteImport } from './routes/dashboard.mar
 import { Route as DashboardFundWalletRouteImport } from './routes/dashboard.fund-wallet'
 import { Route as DashboardCartRouteImport } from './routes/dashboard.cart'
 import { Route as DashboardBuyNumberRouteImport } from './routes/dashboard.buy-number'
+import { Route as DashboardBulkSmsRouteImport } from './routes/dashboard.bulk-sms'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminUploadRouteImport } from './routes/admin.upload'
+import { Route as AdminTwilioRouteImport } from './routes/admin.twilio'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
@@ -80,6 +83,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const DashboardVoiceCallRoute = DashboardVoiceCallRouteImport.update({
+  id: '/voice-call',
+  path: '/voice-call',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardTransactionsRoute = DashboardTransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
@@ -125,6 +133,11 @@ const DashboardBuyNumberRoute = DashboardBuyNumberRouteImport.update({
   path: '/buy-number',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardBulkSmsRoute = DashboardBulkSmsRouteImport.update({
+  id: '/bulk-sms',
+  path: '/bulk-sms',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -133,6 +146,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
 const AdminUploadRoute = AdminUploadRouteImport.update({
   id: '/upload',
   path: '/upload',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTwilioRoute = AdminTwilioRouteImport.update({
+  id: '/twilio',
+  path: '/twilio',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
@@ -174,8 +192,10 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/twilio': typeof AdminTwilioRoute
   '/admin/upload': typeof AdminUploadRoute
   '/admin/users': typeof AdminUsersRoute
+  '/dashboard/bulk-sms': typeof DashboardBulkSmsRoute
   '/dashboard/buy-number': typeof DashboardBuyNumberRoute
   '/dashboard/cart': typeof DashboardCartRoute
   '/dashboard/fund-wallet': typeof DashboardFundWalletRoute
@@ -185,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/send-gifts': typeof DashboardSendGiftsRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/transactions': typeof DashboardTransactionsRoute
+  '/dashboard/voice-call': typeof DashboardVoiceCallRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -199,8 +220,10 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/twilio': typeof AdminTwilioRoute
   '/admin/upload': typeof AdminUploadRoute
   '/admin/users': typeof AdminUsersRoute
+  '/dashboard/bulk-sms': typeof DashboardBulkSmsRoute
   '/dashboard/buy-number': typeof DashboardBuyNumberRoute
   '/dashboard/cart': typeof DashboardCartRoute
   '/dashboard/fund-wallet': typeof DashboardFundWalletRoute
@@ -210,6 +233,7 @@ export interface FileRoutesByTo {
   '/dashboard/send-gifts': typeof DashboardSendGiftsRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/transactions': typeof DashboardTransactionsRoute
+  '/dashboard/voice-call': typeof DashboardVoiceCallRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
 }
@@ -227,8 +251,10 @@ export interface FileRoutesById {
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/twilio': typeof AdminTwilioRoute
   '/admin/upload': typeof AdminUploadRoute
   '/admin/users': typeof AdminUsersRoute
+  '/dashboard/bulk-sms': typeof DashboardBulkSmsRoute
   '/dashboard/buy-number': typeof DashboardBuyNumberRoute
   '/dashboard/cart': typeof DashboardCartRoute
   '/dashboard/fund-wallet': typeof DashboardFundWalletRoute
@@ -238,6 +264,7 @@ export interface FileRoutesById {
   '/dashboard/send-gifts': typeof DashboardSendGiftsRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/transactions': typeof DashboardTransactionsRoute
+  '/dashboard/voice-call': typeof DashboardVoiceCallRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -256,8 +283,10 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/pricing'
     | '/admin/products'
+    | '/admin/twilio'
     | '/admin/upload'
     | '/admin/users'
+    | '/dashboard/bulk-sms'
     | '/dashboard/buy-number'
     | '/dashboard/cart'
     | '/dashboard/fund-wallet'
@@ -267,6 +296,7 @@ export interface FileRouteTypes {
     | '/dashboard/send-gifts'
     | '/dashboard/support'
     | '/dashboard/transactions'
+    | '/dashboard/voice-call'
     | '/admin/'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
@@ -281,8 +311,10 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/pricing'
     | '/admin/products'
+    | '/admin/twilio'
     | '/admin/upload'
     | '/admin/users'
+    | '/dashboard/bulk-sms'
     | '/dashboard/buy-number'
     | '/dashboard/cart'
     | '/dashboard/fund-wallet'
@@ -292,6 +324,7 @@ export interface FileRouteTypes {
     | '/dashboard/send-gifts'
     | '/dashboard/support'
     | '/dashboard/transactions'
+    | '/dashboard/voice-call'
     | '/admin'
     | '/dashboard'
   id:
@@ -308,8 +341,10 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/pricing'
     | '/admin/products'
+    | '/admin/twilio'
     | '/admin/upload'
     | '/admin/users'
+    | '/dashboard/bulk-sms'
     | '/dashboard/buy-number'
     | '/dashboard/cart'
     | '/dashboard/fund-wallet'
@@ -319,6 +354,7 @@ export interface FileRouteTypes {
     | '/dashboard/send-gifts'
     | '/dashboard/support'
     | '/dashboard/transactions'
+    | '/dashboard/voice-call'
     | '/admin/'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
@@ -398,6 +434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/dashboard/voice-call': {
+      id: '/dashboard/voice-call'
+      path: '/voice-call'
+      fullPath: '/dashboard/voice-call'
+      preLoaderRoute: typeof DashboardVoiceCallRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/transactions': {
       id: '/dashboard/transactions'
       path: '/transactions'
@@ -461,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBuyNumberRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/bulk-sms': {
+      id: '/dashboard/bulk-sms'
+      path: '/bulk-sms'
+      fullPath: '/dashboard/bulk-sms'
+      preLoaderRoute: typeof DashboardBulkSmsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -473,6 +523,13 @@ declare module '@tanstack/react-router' {
       path: '/upload'
       fullPath: '/admin/upload'
       preLoaderRoute: typeof AdminUploadRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/twilio': {
+      id: '/admin/twilio'
+      path: '/twilio'
+      fullPath: '/admin/twilio'
+      preLoaderRoute: typeof AdminTwilioRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/products': {
@@ -519,6 +576,7 @@ interface AdminRouteChildren {
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminPricingRoute: typeof AdminPricingRoute
   AdminProductsRoute: typeof AdminProductsRoute
+  AdminTwilioRoute: typeof AdminTwilioRoute
   AdminUploadRoute: typeof AdminUploadRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -530,6 +588,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOrdersRoute: AdminOrdersRoute,
   AdminPricingRoute: AdminPricingRoute,
   AdminProductsRoute: AdminProductsRoute,
+  AdminTwilioRoute: AdminTwilioRoute,
   AdminUploadRoute: AdminUploadRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -538,6 +597,7 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DashboardRouteChildren {
+  DashboardBulkSmsRoute: typeof DashboardBulkSmsRoute
   DashboardBuyNumberRoute: typeof DashboardBuyNumberRoute
   DashboardCartRoute: typeof DashboardCartRoute
   DashboardFundWalletRoute: typeof DashboardFundWalletRoute
@@ -547,10 +607,12 @@ interface DashboardRouteChildren {
   DashboardSendGiftsRoute: typeof DashboardSendGiftsRoute
   DashboardSupportRoute: typeof DashboardSupportRoute
   DashboardTransactionsRoute: typeof DashboardTransactionsRoute
+  DashboardVoiceCallRoute: typeof DashboardVoiceCallRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardBulkSmsRoute: DashboardBulkSmsRoute,
   DashboardBuyNumberRoute: DashboardBuyNumberRoute,
   DashboardCartRoute: DashboardCartRoute,
   DashboardFundWalletRoute: DashboardFundWalletRoute,
@@ -560,6 +622,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardSendGiftsRoute: DashboardSendGiftsRoute,
   DashboardSupportRoute: DashboardSupportRoute,
   DashboardTransactionsRoute: DashboardTransactionsRoute,
+  DashboardVoiceCallRoute: DashboardVoiceCallRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -579,13 +642,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
