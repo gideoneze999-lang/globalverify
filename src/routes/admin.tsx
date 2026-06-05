@@ -20,6 +20,7 @@ const nav = [
   { to: "/admin/approvals", label: "Wallet Approvals", icon: CheckSquare },
   { to: "/admin/orders", label: "Orders & Gifts", icon: PackageCheck },
   { to: "/admin/api-config", label: "5sim API Config", icon: Key },
+  { to: "/admin/twilio", label: "Twilio", icon: Phone },
   { to: "/admin/pricing", label: "Pricing Manager", icon: DollarSign },
   { to: "/admin/upload", label: "Upload Product", icon: UploadCloud },
   { to: "/admin/products", label: "Manage Products", icon: Boxes },
