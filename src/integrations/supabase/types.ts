@@ -487,42 +487,57 @@ export type Database = {
       voice_calls: {
         Row: {
           cost_ngn: number
+          cost_per_minute_ngn: number | null
           created_at: string
+          duration_seconds: number | null
           error: string | null
           from_phone: string
           id: string
           message: string
+          ownership_confirmed_at: string | null
+          script: string | null
           status: string
           to_phone: string
           twilio_sid: string | null
           updated_at: string
           user_id: string
+          voice_sample_url: string | null
         }
         Insert: {
           cost_ngn?: number
+          cost_per_minute_ngn?: number | null
           created_at?: string
+          duration_seconds?: number | null
           error?: string | null
           from_phone: string
           id?: string
           message: string
+          ownership_confirmed_at?: string | null
+          script?: string | null
           status?: string
           to_phone: string
           twilio_sid?: string | null
           updated_at?: string
           user_id: string
+          voice_sample_url?: string | null
         }
         Update: {
           cost_ngn?: number
+          cost_per_minute_ngn?: number | null
           created_at?: string
+          duration_seconds?: number | null
           error?: string | null
           from_phone?: string
           id?: string
           message?: string
+          ownership_confirmed_at?: string | null
+          script?: string | null
           status?: string
           to_phone?: string
           twilio_sid?: string | null
           updated_at?: string
           user_id?: string
+          voice_sample_url?: string | null
         }
         Relationships: []
       }

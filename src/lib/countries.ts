@@ -1,0 +1,47 @@
+// Curated list of common countries for Twilio messaging UI.
+export type CountryOpt = { iso2: string; name: string; flag: string; dial: string };
+
+export const COUNTRIES: CountryOpt[] = [
+  { iso2: "US", name: "United States", flag: "🇺🇸", dial: "+1" },
+  { iso2: "CA", name: "Canada", flag: "🇨🇦", dial: "+1" },
+  { iso2: "GB", name: "United Kingdom", flag: "🇬🇧", dial: "+44" },
+  { iso2: "IE", name: "Ireland", flag: "🇮🇪", dial: "+353" },
+  { iso2: "NG", name: "Nigeria", flag: "🇳🇬", dial: "+234" },
+  { iso2: "GH", name: "Ghana", flag: "🇬🇭", dial: "+233" },
+  { iso2: "KE", name: "Kenya", flag: "🇰🇪", dial: "+254" },
+  { iso2: "ZA", name: "South Africa", flag: "🇿🇦", dial: "+27" },
+  { iso2: "IN", name: "India", flag: "🇮🇳", dial: "+91" },
+  { iso2: "AE", name: "United Arab Emirates", flag: "🇦🇪", dial: "+971" },
+  { iso2: "SA", name: "Saudi Arabia", flag: "🇸🇦", dial: "+966" },
+  { iso2: "DE", name: "Germany", flag: "🇩🇪", dial: "+49" },
+  { iso2: "FR", name: "France", flag: "🇫🇷", dial: "+33" },
+  { iso2: "ES", name: "Spain", flag: "🇪🇸", dial: "+34" },
+  { iso2: "IT", name: "Italy", flag: "🇮🇹", dial: "+39" },
+  { iso2: "NL", name: "Netherlands", flag: "🇳🇱", dial: "+31" },
+  { iso2: "BE", name: "Belgium", flag: "🇧🇪", dial: "+32" },
+  { iso2: "CH", name: "Switzerland", flag: "🇨🇭", dial: "+41" },
+  { iso2: "SE", name: "Sweden", flag: "🇸🇪", dial: "+46" },
+  { iso2: "NO", name: "Norway", flag: "🇳🇴", dial: "+47" },
+  { iso2: "DK", name: "Denmark", flag: "🇩🇰", dial: "+45" },
+  { iso2: "PL", name: "Poland", flag: "🇵🇱", dial: "+48" },
+  { iso2: "TR", name: "Turkey", flag: "🇹🇷", dial: "+90" },
+  { iso2: "BR", name: "Brazil", flag: "🇧🇷", dial: "+55" },
+  { iso2: "MX", name: "Mexico", flag: "🇲🇽", dial: "+52" },
+  { iso2: "AR", name: "Argentina", flag: "🇦🇷", dial: "+54" },
+  { iso2: "CO", name: "Colombia", flag: "🇨🇴", dial: "+57" },
+  { iso2: "AU", name: "Australia", flag: "🇦🇺", dial: "+61" },
+  { iso2: "NZ", name: "New Zealand", flag: "🇳🇿", dial: "+64" },
+  { iso2: "JP", name: "Japan", flag: "🇯🇵", dial: "+81" },
+  { iso2: "KR", name: "South Korea", flag: "🇰🇷", dial: "+82" },
+  { iso2: "CN", name: "China", flag: "🇨🇳", dial: "+86" },
+  { iso2: "HK", name: "Hong Kong", flag: "🇭🇰", dial: "+852" },
+  { iso2: "SG", name: "Singapore", flag: "🇸🇬", dial: "+65" },
+  { iso2: "MY", name: "Malaysia", flag: "🇲🇾", dial: "+60" },
+  { iso2: "ID", name: "Indonesia", flag: "🇮🇩", dial: "+62" },
+  { iso2: "TH", name: "Thailand", flag: "🇹🇭", dial: "+66" },
+  { iso2: "PH", name: "Philippines", flag: "🇵🇭", dial: "+63" },
+  { iso2: "VN", name: "Vietnam", flag: "🇻🇳", dial: "+84" },
+];
+
+export const findCountry = (iso2: string) =>
+  COUNTRIES.find((c) => c.iso2 === iso2.toUpperCase());

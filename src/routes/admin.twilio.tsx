@@ -29,10 +29,13 @@ function TwilioPage() {
   const [country, setCountry] = useState("");
   const [label, setLabel] = useState("");
   const [sms, setSms] = useState(25);
-  const [voice, setVoice] = useState(100);
+  const [voicePerMin, setVoicePerMin] = useState(4000);
 
   useEffect(() => {
-    if (pricing) { setSms(pricing.sms_per_segment_ngn); setVoice(pricing.voice_per_call_ngn); }
+    if (pricing) {
+      setSms(pricing.sms_per_segment_ngn);
+      setVoicePerMin((pricing as any).voice_per_minute_ngn ?? 4000);
+    }
   }, [pricing]);
 
   const addM = useMutation({
@@ -42,8 +45,8 @@ function TwilioPage() {
   });
 
   const savePricing = useMutation({
-    mutationFn: () => setPriceFn({ data: { sms_per_segment_ngn: sms, voice_per_call_ngn: voice } }),
-    onSuccess: () => toast.success("Pricing updated"),
+    mutationFn: () => setPriceFn({ data: { sms_per_segment_ngn: sms, voice_per_minute_ngn: voicePerMin } }),
+    onSuccess: () => { toast.success("Pricing updated"); qc.invalidateQueries({ queryKey: ["msgPricing"] }); },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -58,16 +61,19 @@ function TwilioPage() {
         <h2 className="font-semibold">Messaging pricing (NGN)</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm">SMS per segment</label>
+            <label className="text-sm">Price per SMS</label>
             <Input type="number" value={sms} onChange={(e) => setSms(Number(e.target.value))} />
+            <p className="text-xs text-muted-foreground mt-1">Bulk total = price × recipients × segments.</p>
           </div>
           <div>
-            <label className="text-sm">Voice per call</label>
-            <Input type="number" value={voice} onChange={(e) => setVoice(Number(e.target.value))} />
+            <label className="text-sm">Voice call (per minute)</label>
+            <Input type="number" value={voicePerMin} onChange={(e) => setVoicePerMin(Number(e.target.value))} />
+            <p className="text-xs text-muted-foreground mt-1">Voice-clone calls charged per minute, min 1 min.</p>
           </div>
         </div>
         <Button onClick={() => savePricing.mutate()} disabled={savePricing.isPending}>Save pricing</Button>
       </div>
+
 
       <div className="glass rounded-2xl p-6 space-y-4">
         <h2 className="font-semibold">Add Twilio number</h2>
