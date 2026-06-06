@@ -1,60 +1,61 @@
-## GlobalVerify — Phase 1: Foundation
+## Bulk SMS page (`/dashboard/bulk-sms`)
 
-Phase 1 ships the public landing page, full authentication, the dashboard shell with sidebar navigation, and the admin panel skeleton with role-based access. All wallet/buy-number/marketplace/cart flows are scaffolded as placeholder sections in the dashboard but not wired to real logic — they come in Phase 2+.
+Top tabs: **Single Messaging** | **Bulk Messaging**.
 
-### What gets built
+Shared fields:
+- **Country** dropdown (ISO list with flags). On change, fetch active Twilio numbers for that country from `twilio_numbers` and show a **Sender Number** dropdown (only numbers actually present in our pool for that country are shown; if none, show "No number available for this country yet").
+- **Sender ID** text input (alphanumeric, max 11 chars) — sent as Twilio `From` alphanumeric sender where supported; falls back to the chosen Twilio number where alphanumeric IDs aren't allowed (US/Canada). Tooltip explains this.
+- **Message** textarea with live char + segment counter.
 
-**Branding & design system**
-- Dark navy + royal purple palette with cyan accents, glassmorphism, gradient backgrounds, defined as semantic tokens in `src/styles.css` (oklch).
-- Great Vibes cursive for section headings; Inter for body.
-- Fully responsive.
+Mode-specific:
+- Single: one **Recipient phone** input (E.164).
+- Bulk: textarea + CSV upload; live recipient count.
 
-**Landing page (`/`)**
-- Sticky nav with Login / Get Started.
-- Hero with animated mock OTP card (WhatsApp + Telegram incoming codes).
-- Features section (6 cards), How It Works (4 steps), stats banner, CTA, multi-column footer with social/support links.
-- Full SEO meta (title, description, og tags).
+Live cost panel: `price_per_sms × recipients × segments`, pulled from `app_settings.messaging_pricing.sms_per_segment_ngn`. Disabled "Send" until wallet ≥ cost. Success toast + redirect to job in Recent Jobs.
 
-**Auth (Lovable Cloud)**
-- `/login`, `/signup`, `/forgot-password`, `/reset-password` routes.
-- Signup collects first name, last name, email, phone, password, terms checkbox.
-- Email/password via Supabase Auth, session persistence, `onAuthStateChange` wired at root for cache invalidation.
-- After login → redirect to `/dashboard`.
-- `_authenticated` layout route guards all dashboard pages.
+## Admin pricing page (`/admin/twilio`)
 
-**User dashboard (`/dashboard/*`)**
-- Collapsible sidebar (shadcn Sidebar) with sections: Overview, Buy Number, Send Gifts, Marketplace, Fund Wallet, Cart, Transactions, Profile, Support.
-- Overview shows wallet balance (₦0.00), Fund Wallet button, totals, empty recent-transactions table — reads from `profiles`.
-- All other sections rendered as styled placeholder pages ("Coming soon" with the intended layout sketched) so the shell is fully navigable.
-- Profile page shows email/name, sign-out button.
+Already exists — add a clearer **"Price per SMS (₦)"** field (rename from "per segment" in UI; underlying field stays `sms_per_segment_ngn`) plus a small note that bulk total = price × recipients.
 
-**Admin panel (`/admin/*`)**
-- Separate `_admin` layout route, protected by `has_role(auth.uid(), 'admin')` check in `beforeLoad` via a server function — NOT hardcoded credentials.
-- Sidebar with sections: Overview, Wallet Approvals, 5sim Config, Pricing Manager, Upload Product, Manage Products, Users.
-- All sections rendered as placeholder pages in Phase 1.
-- A note in Overview tells the admin how they were granted the role.
+## Server changes (`messaging.functions.ts`)
 
-**Database (Lovable Cloud / Supabase)**
-- `profiles` table: `id` (FK → auth.users, PK), `first_name`, `last_name`, `phone`, `wallet_balance` (numeric, default 0), `updated_at`.
-- `user_roles` table + `app_role` enum (`admin`, `user`) + `has_role()` SECURITY DEFINER function — the canonical Lovable role pattern.
-- Trigger on `auth.users` insert → creates `profiles` row and assigns default `user` role.
-- RLS enabled on both tables: users can read/update own profile; only admins can read/modify `user_roles`.
-- `deposits` and `products` tables + `receipts` and `products` storage buckets are deferred to Phase 2.
+- Extend `sendBulkSms` validator to accept `sender_id?: string` and `from_number_id?: string` (chosen Twilio number id).
+- New `listTwilioNumbersByCountry(countryIso2)` server fn (authenticated, no admin) returning `{id, phone_e164, label}` for active numbers in that country only.
+- In send loop: if `sender_id` is set and recipient country allows alphanumeric senders (maintain a small allowlist constant), use it as `From`; otherwise use the selected number's E.164.
+- Keep existing wallet debit + per-failure refund logic.
 
-**Bootstrapping the first admin**
-- Since admin is role-based, the first admin must be promoted manually. After you sign up, I'll insert a `user_roles` row for your account via a one-shot SQL action so you can access `/admin`.
+## Voice Call page (`/dashboard/voice-call`)
 
-### Technical notes
+Layout:
+1. **Country** dropdown → **Twilio number** dropdown (same pattern as SMS, sourced from `twilio_numbers`).
+2. **Recipient phone** (E.164).
+3. **Voice sample upload** — accepts audio/video (`audio/*,video/*`), max 25 MB, stored in a new private bucket `voice-samples`. We extract audio server-side later; for now store as-is.
+4. **Ownership checkbox** (required): "I confirm I own this voice or have explicit permission to use it." Submit disabled until checked.
+5. **Per-minute rate** banner showing `app_settings.messaging_pricing.voice_per_minute_ngn` (new field, default ₦4,000). Min 1-minute charge displayed; wallet must cover at least 1 minute.
+6. **Start Call** button.
 
-- Stack: TanStack Start + React, TanStack Query, shadcn/ui, Tailwind v4, Lovable Cloud (Supabase).
-- Auth gating uses `_authenticated` layout (`beforeLoad` redirect) and `_authenticated/_admin` nested layout (server-fn role check).
-- 5sim API key will be added as a Lovable Cloud secret in Phase 2 when the Buy Number flow is built; all 5sim calls go through `createServerFn` so the key never reaches the browser.
-- No hardcoded admin password anywhere.
+## Voice backend — honest scope
 
-### Out of scope for Phase 1 (Phase 2+)
+True realtime voice-to-voice over an active Twilio call requires Twilio Media Streams (WebSocket bidirectional audio) bridged to ElevenLabs' realtime voice-changer stream. Cloudflare Workers (our server runtime) can't reliably host the long-lived dual WebSocket bridge this needs. Two options for the plan:
 
-Buy Number (5sim integration), Send Gifts catalog, Marketplace items + pagination/search, Fund Wallet upload + admin approvals (Realtime), Cart + checkout + shipping form, Transaction history population, Pricing Manager, Product upload/management, User balance adjustment, deposits/products tables and storage buckets.
+- **Option A — ship now, realistic**: User uploads voice sample + types/uploads a script. We clone the voice with ElevenLabs TTS (Instant Voice Clone), synthesize the full message to MP3, host it, and Twilio plays it via `<Play>` during the call. Per-minute billing measured from Twilio's call duration webhook. Works end-to-end on our stack.
+- **Option B — realtime spoof**: Requires a separate always-on Node service (e.g. Fly.io/Render) running the Twilio↔ElevenLabs WebSocket bridge. We'd build the frontend + DB now and stub the backend; live calls only work after that external service is deployed.
 
-### Deliverable at end of Phase 1
+I recommend Option A for v1 and adding Option B as a follow-up once a bridge host is chosen. Tell me which you want before I build.
 
-A polished, branded, fully navigable site: visitors land on the marketing page, sign up, log in, and explore the dashboard shell. You can be promoted to admin and explore the admin shell. All visual design, routing, auth, and role gating are production-ready; feature pages are clearly marked placeholders ready to be filled in.
+## Database
+
+New migration:
+- `app_settings.messaging_pricing` → add `voice_per_minute_ngn` (default 4000), keep `sms_per_segment_ngn` (renamed in UI to "price per SMS").
+- `voice_calls`: add `voice_sample_url`, `duration_seconds`, `cost_per_minute_ngn`, `ownership_confirmed_at`.
+- New bucket `voice-samples` (private) + RLS: users read/write only their own folder `{user_id}/...`.
+
+## Files touched
+
+- `src/routes/dashboard.bulk-sms.tsx` — full rewrite with tabs + pickers.
+- `src/routes/dashboard.voice-call.tsx` — full rewrite with upload + ownership + rate.
+- `src/routes/admin.twilio.tsx` — add voice/min field, relabel SMS field.
+- `src/lib/messaging.functions.ts` — add `listTwilioNumbersByCountry`, extend send/call fns.
+- `supabase/migrations/<new>.sql` — schema + bucket + RLS additions.
+
+**One decision needed**: Option A (clone + play prerecorded synthesized audio, ships fully) or Option B (realtime spoofing, requires external bridge host)?
