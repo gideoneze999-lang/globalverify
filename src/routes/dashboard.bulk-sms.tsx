@@ -333,7 +333,3 @@ function JobRow({ job }: { job: any }) {
     </div>
   );
 }
-
-    </div>
-  );
-}
