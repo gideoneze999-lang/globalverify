@@ -117,12 +117,18 @@ export const sendBulkSms = createServerFn({ method: "POST" })
 
     const wantsAlpha = !!data.sender_id && /^[A-Za-z0-9 ]{1,11}$/.test(data.sender_id);
 
+    const siteUrl = (process.env.PUBLIC_SITE_URL || "https://globalverify.lovable.app").replace(/\/$/, "");
+    const statusCallback = `${siteUrl}/api/public/twilio-status`;
+
     let sent = 0, failed = 0;
     for (const r of unique) {
       const canAlpha = wantsAlpha && r.country && ALPHA_SENDER_COUNTRIES.has(r.country);
       const fromValue = canAlpha ? data.sender_id! : senderRow.phone_e164;
       try {
-        const body = new URLSearchParams({ To: r.e164, From: fromValue, Body: data.message });
+        const body = new URLSearchParams({
+          To: r.e164, From: fromValue, Body: data.message,
+          StatusCallback: statusCallback,
+        });
         const res = await twilioRequest("/Messages.json", body);
         await supabaseAdmin.from("bulk_sms_recipients").insert({
           job_id: job.id, to_phone: r.e164, country_iso2: r.country,
@@ -137,6 +143,7 @@ export const sendBulkSms = createServerFn({ method: "POST" })
         failed++;
       }
     }
+
 
     const refund = failed * perRecipientCost;
     if (refund > 0) {
@@ -168,6 +175,20 @@ export const listMyBulkJobs = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+export const listJobRecipients = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ job_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("bulk_sms_recipients")
+      .select("id, to_phone, from_phone, status, error, delivered_at, created_at, twilio_sid")
+      .eq("job_id", data.job_id)
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
 
 // ---------- Voice clone + call ----------
 // Estimate spoken seconds from script chars (English ~14 chars/sec).
