@@ -35,6 +35,7 @@ export type Database = {
       bulk_sms_jobs: {
         Row: {
           created_at: string
+          delivered_count: number
           failed_count: number
           id: string
           message: string
@@ -47,6 +48,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          delivered_count?: number
           failed_count?: number
           id?: string
           message: string
@@ -59,6 +61,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          delivered_count?: number
           failed_count?: number
           id?: string
           message?: string
@@ -76,6 +79,7 @@ export type Database = {
           cost_ngn: number
           country_iso2: string | null
           created_at: string
+          delivered_at: string | null
           error: string | null
           from_phone: string | null
           id: string
@@ -83,11 +87,13 @@ export type Database = {
           status: string
           to_phone: string
           twilio_sid: string | null
+          updated_at: string
         }
         Insert: {
           cost_ngn?: number
           country_iso2?: string | null
           created_at?: string
+          delivered_at?: string | null
           error?: string | null
           from_phone?: string | null
           id?: string
@@ -95,11 +101,13 @@ export type Database = {
           status?: string
           to_phone: string
           twilio_sid?: string | null
+          updated_at?: string
         }
         Update: {
           cost_ngn?: number
           country_iso2?: string | null
           created_at?: string
+          delivered_at?: string | null
           error?: string | null
           from_phone?: string | null
           id?: string
@@ -107,6 +115,7 @@ export type Database = {
           status?: string
           to_phone?: string
           twilio_sid?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
