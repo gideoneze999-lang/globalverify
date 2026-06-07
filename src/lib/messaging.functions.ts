@@ -176,6 +176,20 @@ export const listMyBulkJobs = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+export const listJobRecipients = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ job_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("bulk_sms_recipients")
+      .select("id, to_phone, from_phone, status, error, delivered_at, created_at, twilio_sid")
+      .eq("job_id", data.job_id)
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+
 // ---------- Voice clone + call ----------
 // Estimate spoken seconds from script chars (English ~14 chars/sec).
 function estimateDurationSeconds(script: string): number {
