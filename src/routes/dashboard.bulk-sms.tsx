@@ -224,23 +224,116 @@ function BulkSmsPage() {
       </div>
 
       <div className="glass rounded-2xl p-6">
-        <h2 className="font-semibold mb-3">Recent jobs</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold">Recent jobs</h2>
+          <Button
+            variant="ghost" size="sm"
+            onClick={() => qc.invalidateQueries({ queryKey: ["bulkJobs"] })}
+          >
+            <RefreshCw className="w-4 h-4 mr-1" /> Refresh
+          </Button>
+        </div>
         <div className="space-y-2">
           {(jobs ?? []).map((j: any) => (
-            <div key={j.id} className="flex items-center justify-between text-sm border-b border-border/30 pb-2">
-              <div>
-                <div className="font-medium truncate max-w-[300px]">{j.message}</div>
-                <div className="text-xs text-muted-foreground">{new Date(j.created_at).toLocaleString()}</div>
-              </div>
-              <div className="text-right">
-                <div>{j.sent_count}/{j.total_recipients} sent</div>
-                <div className="text-xs text-muted-foreground">₦{Number(j.total_cost_ngn).toLocaleString()} · {j.status}</div>
-              </div>
-            </div>
+            <JobRow key={j.id} job={j} />
           ))}
           {(!jobs || jobs.length === 0) && <p className="text-sm text-muted-foreground">No jobs yet.</p>}
         </div>
       </div>
+    </div>
+  );
+}
+
+function statusBadge(status: string) {
+  const map: Record<string, { variant: any; label: string }> = {
+    delivered: { variant: "default", label: "Delivered" },
+    sent: { variant: "secondary", label: "Sent" },
+    failed: { variant: "destructive", label: "Failed" },
+    pending: { variant: "outline", label: "Pending" },
+  };
+  const s = map[status] ?? { variant: "outline", label: status };
+  return <Badge variant={s.variant}>{s.label}</Badge>;
+}
+
+function JobRow({ job }: { job: any }) {
+  const [open, setOpen] = useState(false);
+  const listFn = useServerFn(listJobRecipients);
+  const qc = useQueryClient();
+  const { data: recipients, isFetching } = useQuery({
+    queryKey: ["jobRecipients", job.id],
+    queryFn: () => listFn({ data: { job_id: job.id } }),
+    enabled: open,
+    refetchInterval: open ? 5000 : false,
+  });
+
+  const delivered = job.delivered_count ?? 0;
+  const sent = job.sent_count ?? 0;
+  const failed = job.failed_count ?? 0;
+  const total = job.total_recipients ?? 0;
+
+  return (
+    <div className="border-b border-border/30 pb-2">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between text-sm text-left hover:bg-muted/20 rounded-md px-2 py-1.5"
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          {open ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronRight className="w-4 h-4 shrink-0" />}
+          <div className="min-w-0">
+            <div className="font-medium truncate max-w-[260px]">{job.message}</div>
+            <div className="text-xs text-muted-foreground">{new Date(job.created_at).toLocaleString()}</div>
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <div className="flex gap-1.5 justify-end">
+            <Badge variant="default">{delivered} delivered</Badge>
+            <Badge variant="secondary">{sent} sent</Badge>
+            {failed > 0 && <Badge variant="destructive">{failed} failed</Badge>}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
+            {total} total · ₦{Number(job.total_cost_ngn).toLocaleString()} · {job.status}
+          </div>
+        </div>
+      </button>
+
+      {open && (
+        <div className="mt-2 ml-6 rounded-lg border border-border/40 bg-muted/10 overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-2 text-xs text-muted-foreground">
+            <span>Recipient status {isFetching ? "(refreshing…)" : ""}</span>
+            <button
+              type="button"
+              className="hover:text-foreground"
+              onClick={() => qc.invalidateQueries({ queryKey: ["jobRecipients", job.id] })}
+            >
+              <RefreshCw className="w-3 h-3 inline mr-1" />Refresh
+            </button>
+          </div>
+          <div className="max-h-72 overflow-y-auto divide-y divide-border/30">
+            {(recipients ?? []).map((r: any) => (
+              <div key={r.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                <div className="min-w-0">
+                  <div className="font-mono text-xs">{r.to_phone}</div>
+                  {r.error && <div className="text-xs text-destructive truncate max-w-[260px]">{r.error}</div>}
+                  {r.delivered_at && (
+                    <div className="text-xs text-muted-foreground">
+                      Delivered {new Date(r.delivered_at).toLocaleTimeString()}
+                    </div>
+                  )}
+                </div>
+                {statusBadge(r.status)}
+              </div>
+            ))}
+            {recipients && recipients.length === 0 && (
+              <div className="px-3 py-3 text-xs text-muted-foreground">No recipients.</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
     </div>
   );
 }
