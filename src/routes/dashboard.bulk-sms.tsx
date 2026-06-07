@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  sendBulkSms, listMyBulkJobs,
+  sendBulkSms, listMyBulkJobs, listJobRecipients,
   listTwilioCountries, listTwilioNumbersByCountry,
   getMessagingPricing,
 } from "@/lib/messaging.functions";
@@ -11,9 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MessageSquare, Send, Upload } from "lucide-react";
+import { MessageSquare, Send, Upload, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
+
 import { COUNTRIES, findCountry } from "@/lib/countries";
 
 export const Route = createFileRoute("/dashboard/bulk-sms")({
