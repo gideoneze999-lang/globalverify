@@ -37,6 +37,7 @@ import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminApiConfigRouteImport } from './routes/admin.api-config'
+import { Route as ApiPublicTwilioStatusRouteImport } from './routes/api/public/twilio-status'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -178,6 +179,11 @@ const AdminApiConfigRoute = AdminApiConfigRouteImport.update({
   path: '/api-config',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicTwilioStatusRoute = ApiPublicTwilioStatusRouteImport.update({
+  id: '/api/public/twilio-status',
+  path: '/api/public/twilio-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/voice-call': typeof DashboardVoiceCallRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/public/twilio-status': typeof ApiPublicTwilioStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/dashboard/voice-call': typeof DashboardVoiceCallRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/api/public/twilio-status': typeof ApiPublicTwilioStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/dashboard/voice-call': typeof DashboardVoiceCallRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/public/twilio-status': typeof ApiPublicTwilioStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/dashboard/voice-call'
     | '/admin/'
     | '/dashboard/'
+    | '/api/public/twilio-status'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/dashboard/voice-call'
     | '/admin'
     | '/dashboard'
+    | '/api/public/twilio-status'
   id:
     | '__root__'
     | '/'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/dashboard/voice-call'
     | '/admin/'
     | '/dashboard/'
+    | '/api/public/twilio-status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -367,6 +379,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  ApiPublicTwilioStatusRoute: typeof ApiPublicTwilioStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -567,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApiConfigRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/twilio-status': {
+      id: '/api/public/twilio-status'
+      path: '/api/public/twilio-status'
+      fullPath: '/api/public/twilio-status'
+      preLoaderRoute: typeof ApiPublicTwilioStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -638,6 +658,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  ApiPublicTwilioStatusRoute: ApiPublicTwilioStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

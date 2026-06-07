@@ -117,12 +117,18 @@ export const sendBulkSms = createServerFn({ method: "POST" })
 
     const wantsAlpha = !!data.sender_id && /^[A-Za-z0-9 ]{1,11}$/.test(data.sender_id);
 
+    const siteUrl = (process.env.PUBLIC_SITE_URL || "https://globalverify.lovable.app").replace(/\/$/, "");
+    const statusCallback = `${siteUrl}/api/public/twilio-status`;
+
     let sent = 0, failed = 0;
     for (const r of unique) {
       const canAlpha = wantsAlpha && r.country && ALPHA_SENDER_COUNTRIES.has(r.country);
       const fromValue = canAlpha ? data.sender_id! : senderRow.phone_e164;
       try {
-        const body = new URLSearchParams({ To: r.e164, From: fromValue, Body: data.message });
+        const body = new URLSearchParams({
+          To: r.e164, From: fromValue, Body: data.message,
+          StatusCallback: statusCallback,
+        });
         const res = await twilioRequest("/Messages.json", body);
         await supabaseAdmin.from("bulk_sms_recipients").insert({
           job_id: job.id, to_phone: r.e164, country_iso2: r.country,
@@ -137,6 +143,7 @@ export const sendBulkSms = createServerFn({ method: "POST" })
         failed++;
       }
     }
+
 
     const refund = failed * perRecipientCost;
     if (refund > 0) {
