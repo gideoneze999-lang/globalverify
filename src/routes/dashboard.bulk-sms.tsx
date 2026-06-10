@@ -4,17 +4,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   sendBulkSms, listMyBulkJobs, listJobRecipients,
-  listTwilioCountries, listTwilioNumbersByCountry,
+  listTwilioCountries, listAllAvailableTwilioNumbers,
   getMessagingPricing,
 } from "@/lib/messaging.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MessageSquare, Send, Upload, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
+import { MessageSquare, Send, Upload, ChevronDown, ChevronRight, RefreshCw, Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { COUNTRIES, findCountry } from "@/lib/countries";
 
@@ -34,6 +37,7 @@ function smsSegments(msg: string) {
 function BulkSmsPage() {
   const [mode, setMode] = useState<"single" | "bulk">("single");
   const [country, setCountry] = useState<string>("");
+  const [countryOpen, setCountryOpen] = useState(false);
   const [numberId, setNumberId] = useState<string>("");
   const [senderId, setSenderId] = useState("");
   const [singleTo, setSingleTo] = useState("");
@@ -44,16 +48,15 @@ function BulkSmsPage() {
   const sendFn = useServerFn(sendBulkSms);
   const listFn = useServerFn(listMyBulkJobs);
   const countriesFn = useServerFn(listTwilioCountries);
-  const numbersFn = useServerFn(listTwilioNumbersByCountry);
+  const numbersFn = useServerFn(listAllAvailableTwilioNumbers);
   const pricingFn = useServerFn(getMessagingPricing);
 
   const { data: jobs } = useQuery({ queryKey: ["bulkJobs"], queryFn: () => listFn() });
   const { data: availableCountries } = useQuery({ queryKey: ["twilioCountries"], queryFn: () => countriesFn() });
   const { data: pricing } = useQuery({ queryKey: ["msgPricing"], queryFn: () => pricingFn() });
   const { data: numbers } = useQuery({
-    queryKey: ["twilioNumbers", country],
-    queryFn: () => numbersFn({ data: { country_iso2: country } }),
-    enabled: !!country,
+    queryKey: ["twilioNumbers"],
+    queryFn: () => numbersFn(),
   });
 
   const recipients = useMemo(() => {
@@ -92,8 +95,7 @@ function BulkSmsPage() {
     reader.readAsText(file);
   };
 
-  const availableSet = new Set(availableCountries ?? []);
-  const countriesShown = COUNTRIES.filter((c) => availableSet.has(c.iso2));
+  const countriesShown = COUNTRIES;
   const disabled = !numberId || !message || recipients.length === 0 || mutation.isPending;
 
   return (
@@ -115,38 +117,66 @@ function BulkSmsPage() {
           </TabsList>
 
           <div className="grid sm:grid-cols-2 gap-4 mt-5">
-            <div>
+            <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium">Country</label>
-              <Select value={country} onValueChange={(v) => { setCountry(v); setNumberId(""); }}>
-                <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
-                <SelectContent>
-                  {countriesShown.length === 0 && (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">
-                      No Twilio numbers configured. Ask admin.
-                    </div>
-                  )}
-                  {countriesShown.map((c) => (
-                    <SelectItem key={c.iso2} value={c.iso2}>
-                      {c.flag} {c.name} ({c.dial})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={countryOpen} onOpenChange={setCountryOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={countryOpen}
+                    className="w-full justify-between font-normal"
+                  >
+                    {country
+                      ? countriesShown.find((c) => c.iso2 === country)?.name
+                      : "Select country..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search country..." />
+                    <CommandList>
+                      <CommandEmpty>No country found.</CommandEmpty>
+                      <CommandGroup>
+                        {countriesShown.map((c) => (
+                          <CommandItem
+                            key={c.iso2}
+                            value={c.name}
+                            onSelect={() => {
+                              setCountry(c.iso2);
+                              setCountryOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                country === c.iso2 ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {c.flag} {c.name} ({c.dial})
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div>
               <label className="text-sm font-medium">Twilio sender number</label>
-              <Select value={numberId} onValueChange={setNumberId} disabled={!country}>
-                <SelectTrigger><SelectValue placeholder={country ? "Select number" : "Pick country first"} /></SelectTrigger>
+              <Select value={numberId} onValueChange={setNumberId}>
+                <SelectTrigger><SelectValue placeholder="Select sender number" /></SelectTrigger>
                 <SelectContent>
                   {(numbers ?? []).map((n: any) => (
                     <SelectItem key={n.id} value={n.id}>
-                      {n.phone_e164}{n.label ? ` — ${n.label}` : ""}
+                      {n.phone_e164}{n.label ? ` — ${n.label}` : ""} ({n.country_iso2})
                     </SelectItem>
                   ))}
-                  {country && (numbers ?? []).length === 0 && (
+                  {(numbers ?? []).length === 0 && (
                     <div className="px-3 py-2 text-sm text-muted-foreground">
-                      No number available for {findCountry(country)?.name} yet.
+                      No active sender numbers available.
                     </div>
                   )}
                 </SelectContent>
