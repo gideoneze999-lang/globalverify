@@ -95,6 +95,39 @@ function OverviewPage() {
         <StatCard icon={Gift} label="Referral Balance" value={formatNGN(0)} bar="bg-amber-500" iconBg="bg-amber-500/15 text-amber-400" />
       </div>
 
+      {/* Quick Support Links */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <a 
+          href="https://wa.me/2349160819483" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex-1 glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/5 transition-colors border border-emerald-500/20"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[#25D366]/15 text-[#25D366] grid place-items-center">
+            <MessageCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold">WhatsApp Support</div>
+            <div className="text-xs text-muted-foreground">Chat with us 24/7</div>
+          </div>
+        </a>
+        <a 
+          href="https://t.me/geeupdatecamp" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex-1 glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/5 transition-colors border border-[#0088cc]/20"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[#0088cc]/15 text-[#0088cc] grid place-items-center">
+            <Send className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold">Telegram Channel</div>
+            <div className="text-xs text-muted-foreground">Join for updates</div>
+          </div>
+        </a>
+      </div>
+
+
       {/* Action grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {actions.map((a) => (
