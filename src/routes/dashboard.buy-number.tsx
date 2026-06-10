@@ -22,7 +22,9 @@ import { provisionTwilioNumber } from "@/lib/messaging.functions";
 export const Route = createFileRoute("/dashboard/buy-number")({ component: BuyNumberPage });
 
 function BuyNumberPage() {
+  const qc = useQueryClient();
   const [country, setCountry] = useState("");
+
   const [areaCode, setAreaCode] = useState("");
   const [selectedPhone, setSelectedPhone] = useState<any>(null);
 
