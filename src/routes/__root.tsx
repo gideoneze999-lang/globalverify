@@ -80,14 +80,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <ThemeProvider defaultTheme="dark" storageKey="globalverify-theme">
+          {children}
+        </ThemeProvider>
         <Scripts />
       </body>
     </html>
@@ -105,3 +109,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
