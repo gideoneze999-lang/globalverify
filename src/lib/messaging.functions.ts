@@ -365,6 +365,64 @@ export const listMyCalls = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+// ---------- Twilio Phone Number Purchasing ----------
+export const searchAvailableTwilioNumbers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      country_iso2: z.string().length(2),
+      areaCode: z.string().optional(),
+      limit: z.number().min(1).max(30).default(10),
+    }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const params = new URLSearchParams({
+      Limit: data.limit.toString(),
+    });
+    if (data.areaCode) params.append("AreaCode", data.areaCode);
+
+    const sid = process.env.TWILIO_ACCOUNT_SID;
+    const token = process.env.TWILIO_AUTH_TOKEN;
+    if (!sid || !token) throw new Error("Twilio is not configured");
+
+    const auth = Buffer.from(`${sid}:${token}`).toString("base64");
+    const res = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${sid}/AvailablePhoneNumbers/${data.country_iso2.toUpperCase()}/Local.json?${params.toString()}`,
+      { headers: { Authorization: `Basic ${auth}` } }
+    );
+    const json: any = await res.json();
+    if (!res.ok) throw new Error(json?.message || `Twilio error ${res.status}`);
+    
+    return (json.available_phone_numbers || []).map((n: any) => ({
+      friendly_name: n.friendly_name,
+      phone_number: n.phone_number,
+      iso_country: n.iso_country,
+      capabilities: n.capabilities,
+    }));
+  });
+
+export const fetchTwilioSupportedCountries = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const sid = process.env.TWILIO_ACCOUNT_SID;
+    const token = process.env.TWILIO_AUTH_TOKEN;
+    if (!sid || !token) throw new Error("Twilio is not configured");
+
+    const auth = Buffer.from(`${sid}:${token}`).toString("base64");
+    const res = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${sid}/AvailablePhoneNumbers.json`,
+      { headers: { Authorization: `Basic ${auth}` } }
+    );
+    const json: any = await res.json();
+    if (!res.ok) throw new Error(json?.message || `Twilio error ${res.status}`);
+    
+    // Returns array of { country_code, country, uri }
+    return (json.countries || []).map((c: any) => ({
+      iso2: c.country_code,
+      name: c.country,
+    }));
+  });
+
 // ---------- Admin: Twilio number pool ----------
 export const listTwilioNumbers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -402,6 +460,7 @@ export const toggleTwilioNumber = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { error } = await supabaseAdmin.from("twilio_numbers").update({ active: data.active }).eq("id", data.id);
     if (error) throw new Error(error.message);
+
     return { ok: true };
   });
 

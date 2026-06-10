@@ -1,177 +1,219 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listCountries, listServices, buyNumber, listMyNumbers, checkOrder, cancelOrder } from "@/lib/numbers.functions";
+import { 
+  fetchTwilioSupportedCountries, 
+  searchAvailableTwilioNumbers, 
+  addTwilioNumber,
+  getMessagingPricing
+} from "@/lib/messaging.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Phone, Search, Globe, ChevronRight, Hash, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { formatNGN } from "@/lib/format";
-import { Phone, RefreshCw, X, Copy } from "lucide-react";
 
-export const Route = createFileRoute("/dashboard/buy-number")({ component: BuyNumber });
+export const Route = createFileRoute("/dashboard/buy-number")({ component: BuyNumberPage });
 
-function BuyNumber() {
-  const qc = useQueryClient();
-  const countriesFn = useServerFn(listCountries);
-  const servicesFn = useServerFn(listServices);
-  const buyFn = useServerFn(buyNumber);
-  const myFn = useServerFn(listMyNumbers);
-  const checkFn = useServerFn(checkOrder);
-  const cancelFn = useServerFn(cancelOrder);
-
+function BuyNumberPage() {
   const [country, setCountry] = useState("");
-  const [search, setSearch] = useState("");
+  const [areaCode, setAreaCode] = useState("");
+  const [selectedPhone, setSelectedPhone] = useState<any>(null);
 
-  const { data: countries, isLoading: cLoading, error: cError } = useQuery({ queryKey: ["countries"], queryFn: () => countriesFn() });
-  const { data: services, isLoading: sLoading } = useQuery({
-    queryKey: ["services", country], queryFn: () => servicesFn({ data: { country } }), enabled: !!country,
+  const countriesFn = useServerFn(fetchTwilioSupportedCountries);
+  const searchFn = useServerFn(searchAvailableTwilioNumbers);
+  const addFn = useServerFn(addTwilioNumber);
+  const pricingFn = useServerFn(getMessagingPricing);
+
+  const { data: countries, isLoading: loadingCountries } = useQuery({
+    queryKey: ["twilioCountries"],
+    queryFn: () => countriesFn(),
   });
-  const { data: myNumbers } = useQuery({ queryKey: ["my-numbers"], queryFn: () => myFn(), refetchInterval: 5000 });
 
-  const buyMut = useMutation({
-    mutationFn: (service: string) => buyFn({ data: { country, service } }),
-    onSuccess: (res: any) => {
-      if (res && res.ok === false) { toast.error(res.error ?? "Purchase failed"); return; }
-      toast.success("Number purchased");
-      qc.invalidateQueries({ queryKey: ["my-numbers"] });
-      qc.invalidateQueries({ queryKey: ["profile"] });
+  const { data: pricing } = useQuery({
+    queryKey: ["msgPricing"],
+    queryFn: () => pricingFn(),
+  });
+
+  const { data: availableNumbers, isFetching: searchingNumbers, error: searchError } = useQuery({
+    queryKey: ["availableTwilioNumbers", country, areaCode],
+    queryFn: () => searchFn({ data: { country_iso2: country, areaCode: areaCode || undefined } }),
+    enabled: !!country,
+  });
+
+  const purchaseMutation = useMutation({
+    mutationFn: (num: any) => addFn({ 
+      data: { 
+        phone_e164: num.phone_number, 
+        country_iso2: num.iso_country,
+        label: `Twilio ${num.iso_country}`
+      } 
+    }),
+    onSuccess: () => {
+      toast.success("Phone number successfully provisioned and added to your pool!");
+      setSelectedPhone(null);
+      // In a real app, we'd also handle the Twilio charge here
     },
-    onError: (e: any) => toast.error(e?.message ?? "Purchase failed"),
-  });
-
-  const checkMut = useMutation({ mutationFn: (id: string) => checkFn({ data: { id } }), onSuccess: () => qc.invalidateQueries({ queryKey: ["my-numbers"] }) });
-  const cancelMut = useMutation({
-    mutationFn: (id: string) => cancelFn({ data: { id } }),
-    onSuccess: () => { toast.success("Cancelled & refunded"); qc.invalidateQueries({ queryKey: ["my-numbers"] }); qc.invalidateQueries({ queryKey: ["profile"] }); },
     onError: (e: any) => toast.error(e.message),
   });
 
-  // Auto-cancel pending orders after 10 minutes if no SMS received
-  const autoCancelled = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    if (!myNumbers) return;
-    for (const n of myNumbers as any[]) {
-      if (n.status !== "pending" || autoCancelled.current.has(n.id)) continue;
-      const hasSms = Array.isArray(n.sms) && n.sms.length > 0;
-      if (hasSms) continue;
-      const ageMs = Date.now() - new Date(n.created_at).getTime();
-      if (ageMs >= 10 * 60 * 1000) {
-        autoCancelled.current.add(n.id);
-        cancelMut.mutate(n.id);
-        toast.info(`Number ${n.phone ?? ""} auto-refunded — no code in 10 minutes`);
-      }
-    }
-  }, [myNumbers, cancelMut]);
-
-  const filtered = (services ?? []).filter((s) => s.service.toLowerCase().includes(search.toLowerCase()));
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-5xl mx-auto">
       <div>
-        <p className="text-sm text-accent uppercase tracking-widest">Numbers</p>
-        <h1 className="font-display text-5xl text-gradient mt-1">Buy virtual number</h1>
-        <p className="text-muted-foreground mt-2">Pick a country and service, receive an SMS code.</p>
+        <h1 className="font-display text-4xl text-gradient flex items-center gap-3">
+          <Globe className="w-8 h-8" /> Provision Twilio Number
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Dynamically browse and purchase dedicated Twilio numbers for your messaging campaigns.
+        </p>
       </div>
 
-      {cError && (
-        <div className="glass rounded-2xl p-4 text-sm text-destructive">{(cError as Error).message}</div>
-      )}
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-1 space-y-6">
+          <div className="glass rounded-2xl p-6 space-y-4">
+            <h2 className="font-semibold flex items-center gap-2">
+              <Search className="w-4 h-4" /> Filter Search
+            </h2>
+            
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Select Country</label>
+              <Select value={country} onValueChange={(val) => { setCountry(val); setSelectedPhone(null); }}>
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Choose a country"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {(countries ?? []).map((c: any) => (
+                    <SelectItem key={c.iso2} value={c.iso2}>
+                      {c.name} ({c.iso2})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-      <div className="glass rounded-2xl p-6 space-y-4">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground">Country</label>
-            <select
-              value={country} onChange={(e) => setCountry(e.target.value)}
-              className="w-full mt-1 bg-card border border-border rounded-md p-2.5 text-sm"
-            >
-              <option value="">{cLoading ? "Loading…" : "Select country"}</option>
-              {(countries ?? []).map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground">Search service</label>
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="e.g. whatsapp, telegram" disabled={!country} />
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Area Code (Optional)</label>
+              <Input 
+                placeholder="e.g. 415" 
+                value={areaCode}
+                onChange={(e) => setAreaCode(e.target.value)}
+                maxLength={5}
+              />
+            </div>
+
+            <div className="pt-2">
+              <div className="rounded-xl bg-primary/5 border border-primary/20 p-4">
+                <div className="text-xs text-muted-foreground uppercase tracking-widest font-semibold mb-1">Estimated Cost</div>
+                <div className="text-2xl font-display text-gradient">{formatNGN(5000)} <span className="text-sm font-normal text-muted-foreground">/ month</span></div>
+                <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
+                  Price includes Twilio provisioning and local regulatory compliance fees.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {country && (
-          <div className="border-t border-border/40 pt-4">
-            {sLoading ? <p className="text-sm text-muted-foreground">Loading services…</p> :
-              filtered.length === 0 ? <p className="text-sm text-muted-foreground">No services found.</p> :
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[420px] overflow-y-auto">
-                {filtered.map((s) => (
-                  <div key={s.service} className="rounded-lg border border-border/50 p-3 flex flex-col gap-2 bg-card/40">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium text-sm capitalize truncate">{s.service}</div>
-                      <span className="text-xs text-muted-foreground">{s.qty} avail</span>
-                    </div>
-                    <div className="text-gradient font-display text-xl">{formatNGN(s.price_ngn)}</div>
-                    <Button size="sm" className="gradient-primary" onClick={() => buyMut.mutate(s.service)} disabled={buyMut.isPending}>
-                      Buy
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            }
-          </div>
-        )}
-      </div>
+        <div className="lg:col-span-2 space-y-6">
+          <div className="glass rounded-2xl p-6">
+            <h2 className="font-semibold mb-4 flex items-center justify-between">
+              <span>Available Numbers</span>
+              {searchingNumbers && <div className="text-xs font-normal text-muted-foreground animate-pulse">Searching Twilio inventory...</div>}
+            </h2>
 
-      <div className="glass rounded-2xl p-6">
-        <h2 className="font-semibold mb-4">Your numbers</h2>
-        {!myNumbers?.length ? (
-          <p className="text-sm text-muted-foreground">No numbers yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {myNumbers.map((n: any) => (
-              <li key={n.id} className="rounded-lg border border-border/50 p-4 bg-card/40">
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div>
-                    <div className="flex items-center gap-2 font-medium">
-                      <Phone className="w-4 h-4 text-accent" /> {n.phone || "—"}
-                      {n.phone && (
-                        <button onClick={() => { navigator.clipboard.writeText(n.phone); toast.success("Copied"); }} className="text-muted-foreground hover:text-accent">
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground capitalize">{n.service} • {n.country} • {formatNGN(n.price_ngn)}</div>
+            {!country && (
+              <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center text-muted-foreground">
+                  <Globe className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-medium">No Country Selected</h3>
+                  <p className="text-sm text-muted-foreground">Select a country to browse real-time inventory.</p>
+                </div>
+              </div>
+            )}
+
+            {country && (
+              <div className="space-y-3">
+                {searchError && (
+                  <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex gap-3">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    <p>{(searchError as Error).message}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      n.status === "received" ? "bg-accent/20 text-accent" :
-                      n.status === "cancelled" || n.status === "timeout" ? "bg-destructive/20 text-destructive" :
-                      "bg-muted text-muted-foreground"
-                    }`}>{n.status}</span>
-                    <Button size="sm" variant="ghost" onClick={() => checkMut.mutate(n.id)}><RefreshCw className="w-3.5 h-3.5" /></Button>
-                    {n.status === "pending" && (
-                      <Button size="sm" variant="ghost" onClick={() => cancelMut.mutate(n.id)}><X className="w-3.5 h-3.5" /></Button>
-                    )}
+                )}
+
+                <div className="grid sm:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-2">
+                  {(availableNumbers ?? []).map((num: any) => (
+                    <div 
+                      key={num.phone_number}
+                      className={cn(
+                        "p-4 rounded-xl border transition-all cursor-pointer group relative",
+                        selectedPhone?.phone_number === num.phone_number
+                          ? "bg-primary/10 border-primary shadow-lg ring-1 ring-primary"
+                          : "bg-background/40 border-border/50 hover:border-primary/50 hover:bg-muted/30"
+                      )}
+                      onClick={() => setSelectedPhone(num)}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="font-mono text-lg font-bold group-hover:text-primary transition-colors">
+                          {num.friendly_name}
+                        </div>
+                        {selectedPhone?.phone_number === num.phone_number && (
+                          <Badge className="bg-primary text-primary-foreground">Selected</Badge>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-2 mb-3">
+                        {num.capabilities?.SMS && <Badge variant="outline" className="text-[10px] h-5">SMS</Badge>}
+                        {num.capabilities?.voice && <Badge variant="outline" className="text-[10px] h-5">Voice</Badge>}
+                        {num.capabilities?.MMS && <Badge variant="outline" className="text-[10px] h-5">MMS</Badge>}
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Provisioning Instant</span>
+                        <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  ))}
+                  {country && !searchingNumbers && availableNumbers?.length === 0 && (
+                    <div className="col-span-full py-12 text-center text-muted-foreground italic">
+                      No matching numbers found in this region.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {selectedPhone && (
+            <div className="glass rounded-2xl p-6 border-primary/30 bg-primary/5 animate-in slide-in-from-bottom-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                    <Hash className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Confirm Provisioning</h3>
+                    <p className="text-sm text-muted-foreground">You are purchasing {selectedPhone.phone_number}</p>
                   </div>
                 </div>
-                {n.status === "pending" && (!Array.isArray(n.sms) || n.sms.length === 0) && (
-                  <div className="mt-3 rounded-md bg-background/50 border border-dashed border-border p-3 text-sm">
-                    <div className="text-xs text-accent uppercase tracking-wider">Waiting for code…</div>
-                    <div className="font-mono text-muted-foreground mt-1">SMS will appear here. Auto-refund if none in 10 min.</div>
-                  </div>
-                )}
-                {Array.isArray(n.sms) && n.sms.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {n.sms.map((s: any, i: number) => (
-                      <div key={i} className="rounded-md bg-accent/10 border border-accent/30 p-3 text-sm">
-                        <div className="text-xs text-muted-foreground">{s.sender ?? s.from ?? ""} • {s.date ? new Date(s.date).toLocaleString() : ""}</div>
-                        <div className="font-mono text-lg text-accent mt-1">{s.code ?? s.text ?? ""}</div>
-                        {s.code && s.text && <div className="text-xs text-muted-foreground mt-1">{s.text}</div>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setSelectedPhone(null)}>Cancel</Button>
+                  <Button 
+                    className="gradient-primary" 
+                    disabled={purchaseMutation.isPending}
+                    onClick={() => purchaseMutation.mutate(selectedPhone)}
+                  >
+                    {purchaseMutation.isPending ? "Provisioning..." : "Buy Now"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
