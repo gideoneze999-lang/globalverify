@@ -109,10 +109,13 @@ function FundWallet() {
                   },
                   text: "Pay with Paystack",
                   onSuccess: (reference: any) => {
+                    console.log("Paystack Success:", reference);
                     toast.success("Payment successful! Your balance will update shortly.");
                     setAmount("");
                     qc.invalidateQueries({ queryKey: ["my-deposits"] });
                     qc.invalidateQueries({ queryKey: ["profile"] });
+                    qc.invalidateQueries({ queryKey: ["settings"] });
+                  },
                   },
                   onClose: () => toast.info("Payment cancelled"),
                 }}
