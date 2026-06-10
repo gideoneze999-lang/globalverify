@@ -44,7 +44,7 @@ function BulkSmsPage() {
   const sendFn = useServerFn(sendBulkSms);
   const listFn = useServerFn(listMyBulkJobs);
   const countriesFn = useServerFn(listTwilioCountries);
-  const numbersFn = useServerFn(listTwilioNumbersByCountry);
+  const numbersFn = useServerFn(listAllAvailableTwilioNumbers);
   const pricingFn = useServerFn(getMessagingPricing);
 
   const { data: jobs } = useQuery({ queryKey: ["bulkJobs"], queryFn: () => listFn() });
