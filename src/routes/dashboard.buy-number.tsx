@@ -78,9 +78,19 @@ function BuyNumberPage() {
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-6">
           <div className="glass rounded-2xl p-6 space-y-4">
-            <h2 className="font-semibold flex items-center gap-2">
-              <Search className="w-4 h-4" /> Filter Search
+            <h2 className="font-semibold flex items-center justify-between">
+              <span className="flex items-center gap-2"><Search className="w-4 h-4" /> Filter Search</span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8" 
+                onClick={() => qc.invalidateQueries({ queryKey: ["twilioCountries"] })}
+                title="Refresh countries"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
             </h2>
+
             
             <div className="space-y-3">
               <label className="text-sm font-medium">Select Country</label>
