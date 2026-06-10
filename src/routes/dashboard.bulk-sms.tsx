@@ -11,10 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MessageSquare, Send, Upload, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
+import { MessageSquare, Send, Upload, ChevronDown, ChevronRight, RefreshCw, Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { COUNTRIES, findCountry } from "@/lib/countries";
 
