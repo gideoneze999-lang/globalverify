@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Shield, Zap, Globe2, Lock, CreditCard, Headphones, MessageCircle, Send, Check } from "lucide-react";
+import { Shield, Zap, Globe2, Lock, CreditCard, Headphones, MessageCircle, Send, Check, Bell } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect, useState } from "react";
 import logo from "@/assets/logo.png";
 
@@ -67,9 +68,11 @@ function Nav() {
           <a href="#stats" className="hover:text-foreground transition">Why us</a>
         </nav>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" asChild><Link to="/login">Login</Link></Button>
+          <ThemeToggle />
+          <Button variant="ghost" asChild className="hidden sm:inline-flex"><Link to="/login">Login</Link></Button>
           <Button asChild className="gradient-primary shadow-glow"><Link to="/signup">Get Started</Link></Button>
         </div>
+
       </div>
     </header>
   );
