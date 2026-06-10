@@ -129,17 +129,17 @@ function BulkSmsPage() {
 
             <div>
               <label className="text-sm font-medium">Twilio sender number</label>
-              <Select value={numberId} onValueChange={setNumberId} disabled={!country}>
-                <SelectTrigger><SelectValue placeholder={country ? "Select number" : "Pick country first"} /></SelectTrigger>
+              <Select value={numberId} onValueChange={setNumberId}>
+                <SelectTrigger><SelectValue placeholder="Select sender number" /></SelectTrigger>
                 <SelectContent>
                   {(numbers ?? []).map((n: any) => (
                     <SelectItem key={n.id} value={n.id}>
-                      {n.phone_e164}{n.label ? ` — ${n.label}` : ""}
+                      {n.phone_e164}{n.label ? ` — ${n.label}` : ""} ({n.country_iso2})
                     </SelectItem>
                   ))}
-                  {country && (numbers ?? []).length === 0 && (
+                  {(numbers ?? []).length === 0 && (
                     <div className="px-3 py-2 text-sm text-muted-foreground">
-                      No number available for {findCountry(country)?.name} yet.
+                      No active sender numbers available.
                     </div>
                   )}
                 </SelectContent>
