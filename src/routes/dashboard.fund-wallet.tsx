@@ -116,7 +116,6 @@ function FundWallet() {
                     qc.invalidateQueries({ queryKey: ["profile"] });
                     qc.invalidateQueries({ queryKey: ["settings"] });
                   },
-                  },
                   onClose: () => toast.info("Payment cancelled"),
                 }}
               />
