@@ -4,11 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { checkIsAdmin } from "@/lib/admin.functions";
-import { LayoutDashboard, Phone, Gift, ShoppingBag, Wallet, ShoppingCart, History, User as UserIcon, Headphones, Menu, X, LogOut, ShieldCheck, Package, MessageSquare, PhoneCall } from "lucide-react";
+import { LayoutDashboard, Phone, Gift, ShoppingBag, Wallet, ShoppingCart, History, User as UserIcon, Headphones, Menu, X, LogOut, ShieldCheck, Package, MessageSquare, PhoneCall, Bell } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { ThemeToggle } from "@/components/theme-toggle";
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — GlobalVerify" }] }),
