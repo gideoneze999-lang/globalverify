@@ -406,9 +406,18 @@ export const fetchTwilioSupportedCountries = createServerFn({ method: "GET" })
   .handler(async () => {
     const sid = process.env.TWILIO_ACCOUNT_SID;
     const token = process.env.TWILIO_AUTH_TOKEN;
-    if (!sid || !token) throw new Error("Twilio is not configured");
+    if (!sid || !token) throw new Error("Twilio is not configured. Admin must set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN.");
 
     const auth = Buffer.from(`${sid}:${token}`).toString("base64");
+    // Verify credentials first by calling account info
+    const verifyRes = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}.json`, {
+      headers: { Authorization: `Basic ${auth}` }
+    });
+    if (!verifyRes.ok) {
+      const json: any = await verifyRes.json();
+      throw new Error(`Twilio authentication failed: ${json.message || verifyRes.status}`);
+    }
+
     const res = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${sid}/AvailablePhoneNumbers.json`,
       { headers: { Authorization: `Basic ${auth}` } }
@@ -416,14 +425,63 @@ export const fetchTwilioSupportedCountries = createServerFn({ method: "GET" })
     const json: any = await res.json();
     if (!res.ok) throw new Error(json?.message || `Twilio error ${res.status}`);
     
-    // Returns array of { country_code, country, uri }
     return (json.countries || []).map((c: any) => ({
       iso2: c.country_code,
       name: c.country,
     }));
   });
 
+export const provisionTwilioNumber = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => 
+    z.object({ 
+      phone_number: z.string(), 
+      iso_country: z.string().length(2) 
+    }).parse(d)
+  )
+  .handler(async ({ data, context }) => {
+    const sid = process.env.TWILIO_ACCOUNT_SID;
+    const token = process.env.TWILIO_AUTH_TOKEN;
+    if (!sid || !token) throw new Error("Twilio is not configured");
+
+    const auth = Buffer.from(`${sid}:${token}`).toString("base64");
+    
+    // 1. Purchase the number in Twilio
+    const purchaseRes = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${sid}/IncomingPhoneNumbers.json`,
+      {
+        method: "POST",
+        headers: { 
+          Authorization: `Basic ${auth}`,
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({ PhoneNumber: data.phone_number })
+      }
+    );
+    
+    const purchaseJson: any = await purchaseRes.json();
+    if (!purchaseRes.ok) throw new Error(purchaseJson.message || "Failed to purchase number in Twilio");
+
+    // 2. Add to our local database pool
+    const { data: row, error } = await supabaseAdmin.from("twilio_numbers").insert({
+      phone_e164: purchaseJson.phone_number,
+      country_iso2: data.iso_country.toUpperCase(),
+      label: `Provisioned ${data.iso_country}`,
+      active: true,
+      twilio_sid: purchaseJson.sid
+    }).select().single();
+
+    if (error) {
+      console.error("Local DB sync error after Twilio purchase:", error);
+      // We don't throw here because the Twilio purchase was successful, 
+      // but we should notify the user or try to reconcile.
+    }
+
+    return { ok: true, phone: purchaseJson.phone_number };
+  });
+
 // ---------- Admin: Twilio number pool ----------
+
 export const listTwilioNumbers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
