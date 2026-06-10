@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   sendBulkSms, listMyBulkJobs, listJobRecipients,
-  listTwilioCountries, listTwilioNumbersByCountry,
+  listTwilioCountries, listAllAvailableTwilioNumbers,
   getMessagingPricing,
 } from "@/lib/messaging.functions";
 import { Button } from "@/components/ui/button";
