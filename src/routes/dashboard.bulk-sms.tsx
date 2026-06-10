@@ -51,9 +51,8 @@ function BulkSmsPage() {
   const { data: availableCountries } = useQuery({ queryKey: ["twilioCountries"], queryFn: () => countriesFn() });
   const { data: pricing } = useQuery({ queryKey: ["msgPricing"], queryFn: () => pricingFn() });
   const { data: numbers } = useQuery({
-    queryKey: ["twilioNumbers", country],
-    queryFn: () => numbersFn({ data: { country_iso2: country } }),
-    enabled: !!country,
+    queryKey: ["twilioNumbers"],
+    queryFn: () => numbersFn(),
   });
 
   const recipients = useMemo(() => {
