@@ -94,7 +94,7 @@ function FundWallet() {
               <PaystackButton
                 className="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gradient-primary shadow-glow h-10 px-4 py-2"
                 {...{
-                  publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "pk_test_placeholder",
+                  publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "",
                   email: user.email,
                   amount: Number(amount) * 100,
                   metadata: {
@@ -107,7 +107,6 @@ function FundWallet() {
                       }
                     ]
                   },
-                  publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "",
                   text: "Pay with Paystack",
                   onSuccess: (reference: any) => {
                     toast.success("Payment successful! Your balance will update shortly.");
