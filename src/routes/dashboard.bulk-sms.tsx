@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -16,8 +16,9 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MessageSquare, Send, Upload, ChevronDown, ChevronRight, RefreshCw, Check, ChevronsUpDown } from "lucide-react";
+import { MessageSquare, Send, Upload, ChevronDown, ChevronRight, RefreshCw, Check, ChevronsUpDown, AlertCircle, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDebounce } from "@/hooks/use-debounce";
 
 import { COUNTRIES, findCountry } from "@/lib/countries";
 
@@ -38,6 +39,8 @@ function BulkSmsPage() {
   const [mode, setMode] = useState<"single" | "bulk">("single");
   const [country, setCountry] = useState<string>("");
   const [countryOpen, setCountryOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [numberId, setNumberId] = useState<string>("");
   const [senderId, setSenderId] = useState("");
   const [singleTo, setSingleTo] = useState("");
@@ -47,17 +50,45 @@ function BulkSmsPage() {
   const qc = useQueryClient();
   const sendFn = useServerFn(sendBulkSms);
   const listFn = useServerFn(listMyBulkJobs);
-  const countriesFn = useServerFn(listTwilioCountries);
   const numbersFn = useServerFn(listAllAvailableTwilioNumbers);
   const pricingFn = useServerFn(getMessagingPricing);
 
   const { data: jobs } = useQuery({ queryKey: ["bulkJobs"], queryFn: () => listFn() });
-  const { data: availableCountries } = useQuery({ queryKey: ["twilioCountries"], queryFn: () => countriesFn() });
   const { data: pricing } = useQuery({ queryKey: ["msgPricing"], queryFn: () => pricingFn() });
   const { data: numbers } = useQuery({
     queryKey: ["twilioNumbers"],
     queryFn: () => numbersFn(),
   });
+
+  // Filter countries that actually have active sender numbers in the pool
+  const activeCountriesSet = useMemo(() => {
+    if (!numbers) return new Set<string>();
+    return new Set(numbers.map(n => n.country_iso2.toUpperCase()));
+  }, [numbers]);
+
+  const countriesShown = useMemo(() => {
+    const supported = COUNTRIES.filter(c => activeCountriesSet.has(c.iso2));
+    if (!debouncedSearch) return supported;
+    const q = debouncedSearch.toLowerCase();
+    return supported.filter(c => 
+      c.name.toLowerCase().includes(q) || 
+      c.iso2.toLowerCase().includes(q) || 
+      c.dial.includes(q)
+    );
+  }, [activeCountriesSet, debouncedSearch]);
+
+  const countryNumbers = useMemo(() => {
+    if (!numbers || !country) return [];
+    return numbers.filter(n => n.country_iso2.toUpperCase() === country.toUpperCase());
+  }, [numbers, country]);
+
+  // Reset number selection if the selected number is not in the current country
+  useEffect(() => {
+    if (country && numberId) {
+      const exists = countryNumbers.some(n => n.id === numberId);
+      if (!exists) setNumberId("");
+    }
+  }, [country, countryNumbers, numberId]);
 
   const recipients = useMemo(() => {
     const raw = mode === "single" ? singleTo : bulkText;
@@ -69,14 +100,23 @@ function BulkSmsPage() {
   const totalCost = recipients.length * segments * pricePerSms;
 
   const mutation = useMutation({
-    mutationFn: () => sendFn({
-      data: {
-        message,
-        recipients,
-        from_number_id: numberId,
-        sender_id: senderId.trim() || undefined,
-      },
-    }),
+    mutationFn: () => {
+      // Pre-send check: ensure there are active sender numbers for the selected country
+      if (!country) throw new Error("Please select a destination country first.");
+      if (countryNumbers.length === 0) {
+        throw new Error(`No active sender numbers available for ${findCountry(country)?.name || country}. Please add a number for this country first.`);
+      }
+      if (!numberId) throw new Error("Please select a sender number.");
+
+      return sendFn({
+        data: {
+          message,
+          recipients,
+          from_number_id: numberId,
+          sender_id: senderId.trim() || undefined,
+        },
+      });
+    },
     onSuccess: (r) => {
       toast.success(`Sent ${r.sent}, failed ${r.failed}. Charged ₦${r.cost.toLocaleString()}`);
       setSingleTo(""); setBulkText(""); setMessage("");
@@ -95,7 +135,6 @@ function BulkSmsPage() {
     reader.readAsText(file);
   };
 
-  const countriesShown = COUNTRIES;
   const disabled = !numberId || !message || recipients.length === 0 || mutation.isPending;
 
   return (
@@ -116,117 +155,159 @@ function BulkSmsPage() {
             <TabsTrigger value="bulk">Bulk Messaging</TabsTrigger>
           </TabsList>
 
-          <div className="grid sm:grid-cols-2 gap-4 mt-5">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium">Country</label>
-              <Popover open={countryOpen} onOpenChange={setCountryOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={countryOpen}
-                    className="w-full justify-between font-normal"
-                  >
-                    {country
-                      ? countriesShown.find((c) => c.iso2 === country)?.name
-                      : "Select country..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search country..." />
-                    <CommandList>
-                      <CommandEmpty>No country found.</CommandEmpty>
-                      <CommandGroup>
-                        {countriesShown.map((c) => (
-                          <CommandItem
-                            key={c.iso2}
-                            value={c.name}
-                            onSelect={() => {
-                              setCountry(c.iso2);
-                              setCountryOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                country === c.iso2 ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {c.flag} {c.name} ({c.dial})
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
+          <div className="grid sm:grid-cols-2 gap-6 mt-5">
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium">Destination Country</label>
+                <Popover open={countryOpen} onOpenChange={setCountryOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={countryOpen}
+                      className="w-full justify-between font-normal"
+                    >
+                      {country
+                        ? countriesShown.find((c) => c.iso2 === country)?.name || findCountry(country)?.name
+                        : "Select country..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                    <Command shouldFilter={false}>
+                      <CommandInput 
+                        placeholder="Search country..." 
+                        value={searchQuery}
+                        onValueChange={setSearchQuery}
+                      />
+                      <CommandList>
+                        <CommandEmpty>No supported country found.</CommandEmpty>
+                        <CommandGroup>
+                          {countriesShown.map((c) => (
+                            <CommandItem
+                              key={c.iso2}
+                              value={c.iso2}
+                              onSelect={() => {
+                                setCountry(c.iso2);
+                                setCountryOpen(false);
+                                setSearchQuery("");
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  country === c.iso2 ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {c.flag} {c.name} ({c.dial})
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <p className="text-xs text-muted-foreground">
+                  Only countries with active sender numbers are shown.
+                </p>
+              </div>
 
-            <div>
-              <label className="text-sm font-medium">Twilio sender number</label>
-              <Select value={numberId} onValueChange={setNumberId}>
-                <SelectTrigger><SelectValue placeholder="Select sender number" /></SelectTrigger>
-                <SelectContent>
-                  {(numbers ?? []).map((n: any) => (
-                    <SelectItem key={n.id} value={n.id}>
-                      {n.phone_e164}{n.label ? ` — ${n.label}` : ""} ({n.country_iso2})
-                    </SelectItem>
-                  ))}
-                  {(numbers ?? []).length === 0 && (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">
-                      No active sender numbers available.
+              <div>
+                <label className="text-sm font-medium">Twilio sender number</label>
+                <Select value={numberId} onValueChange={setNumberId} disabled={!country}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={country ? "Select sender number" : "Select country first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countryNumbers.map((n: any) => (
+                      <SelectItem key={n.id} value={n.id}>
+                        {n.phone_e164}{n.label ? ` — ${n.label}` : ""}
+                      </SelectItem>
+                    ))}
+                    {country && countryNumbers.length === 0 && (
+                      <div className="px-3 py-2 text-sm text-destructive flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        No active sender numbers for this country.
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
+                
+                {country && countryNumbers.length > 0 && (
+                  <div className="mt-3 p-3 rounded-xl bg-muted/20 border border-border/30">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Phone className="w-3 h-3" /> Available Numbers ({countryNumbers.length})
                     </div>
-                  )}
-                </SelectContent>
-              </Select>
+                    <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                      {countryNumbers.map((n: any) => (
+                        <div 
+                          key={n.id} 
+                          className={cn(
+                            "text-xs py-1.5 px-2 rounded-md border flex items-center justify-between cursor-pointer transition-colors",
+                            numberId === n.id 
+                              ? "bg-primary/10 border-primary/30 text-primary font-medium" 
+                              : "bg-background/50 border-transparent hover:bg-muted/50"
+                          )}
+                          onClick={() => setNumberId(n.id)}
+                        >
+                          <span className="font-mono">{n.phone_e164}</span>
+                          {n.label && <span className="text-[10px] opacity-70 truncate max-w-[80px]">{n.label}</span>}
+                          {numberId === n.id && <Check className="w-3 h-3 ml-1" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Custom Sender ID (optional)</label>
-              <Input
-                value={senderId}
-                onChange={(e) => setSenderId(e.target.value)}
-                maxLength={11}
-                placeholder="MyBrand"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Up to 11 chars (A–Z, 0–9). Some countries (US/Canada) ignore this and use the phone number.
-              </p>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">{mode === "single" ? "Recipient phone" : "Recipients"}</label>
-              {mode === "single" ? (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Custom Sender ID (optional)</label>
                 <Input
-                  value={singleTo}
-                  onChange={(e) => setSingleTo(e.target.value)}
-                  placeholder="+14155552671"
+                  value={senderId}
+                  onChange={(e) => setSenderId(e.target.value)}
+                  maxLength={11}
+                  placeholder="MyBrand"
                 />
-              ) : (
-                <>
-                  <Textarea
-                    rows={5}
-                    value={bulkText}
-                    onChange={(e) => setBulkText(e.target.value)}
-                    placeholder="+14155552671&#10;+2348012345678&#10;+447700900123"
+                <p className="text-xs text-muted-foreground mt-1">
+                  Up to 11 chars (A–Z, 0–9). US/Canada ignore this and use the phone number.
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">{mode === "single" ? "Recipient phone" : "Recipients"}</label>
+                {mode === "single" ? (
+                  <Input
+                    value={singleTo}
+                    onChange={(e) => setSingleTo(e.target.value)}
+                    placeholder="+14155552671"
                   />
-                  <label className="inline-flex items-center gap-2 text-xs mt-2 cursor-pointer text-muted-foreground hover:text-foreground">
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Upload CSV / TXT</span>
-                    <input
-                      type="file"
-                      accept=".csv,.txt"
-                      className="hidden"
-                      onChange={(e) => { const f = e.target.files?.[0]; if (f) onCsvUpload(f); e.target.value = ""; }}
+                ) : (
+                  <>
+                    <Textarea
+                      rows={5}
+                      value={bulkText}
+                      onChange={(e) => setBulkText(e.target.value)}
+                      placeholder="+14155552671&#10;+2348012345678&#10;+447700900123"
                     />
-                  </label>
-                </>
-              )}
+                    <label className="inline-flex items-center gap-2 text-xs mt-2 cursor-pointer text-muted-foreground hover:text-foreground">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload CSV / TXT</span>
+                      <input
+                        type="file"
+                        accept=".csv,.txt"
+                        className="hidden"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) onCsvUpload(f); e.target.value = ""; }}
+                      />
+                    </label>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </Tabs>
+
 
         <div>
           <label className="text-sm font-medium">Message</label>
