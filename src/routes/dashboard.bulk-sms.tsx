@@ -92,8 +92,7 @@ function BulkSmsPage() {
     reader.readAsText(file);
   };
 
-  const availableSet = new Set(availableCountries ?? []);
-  const countriesShown = COUNTRIES.filter((c) => availableSet.has(c.iso2));
+  const countriesShown = COUNTRIES;
   const disabled = !numberId || !message || recipients.length === 0 || mutation.isPending;
 
   return (
