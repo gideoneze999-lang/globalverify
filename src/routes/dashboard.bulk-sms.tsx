@@ -37,6 +37,7 @@ function smsSegments(msg: string) {
 function BulkSmsPage() {
   const [mode, setMode] = useState<"single" | "bulk">("single");
   const [country, setCountry] = useState<string>("");
+  const [countryOpen, setCountryOpen] = useState(false);
   const [numberId, setNumberId] = useState<string>("");
   const [senderId, setSenderId] = useState("");
   const [singleTo, setSingleTo] = useState("");
