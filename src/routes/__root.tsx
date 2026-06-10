@@ -81,6 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { SupportButtons } from "@/components/support-buttons";
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
@@ -105,8 +106,10 @@ function RootComponent() {
       <AuthProvider>
         <Outlet />
         <Toaster />
+        <SupportButtons />
       </AuthProvider>
     </QueryClientProvider>
   );
 }
+
 
