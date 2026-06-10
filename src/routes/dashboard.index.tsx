@@ -6,8 +6,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
   Wallet, Plus, Phone, History, ShoppingCart, Gift, ShoppingBag,
-  Coins, Smartphone, ArrowDownLeft, ArrowUpRight,
+  Coins, Smartphone, ArrowDownLeft, ArrowUpRight, MessageCircle, Send
 } from "lucide-react";
+
 import { myStats } from "@/lib/transactions.functions";
 import { formatNGN } from "@/lib/format";
 
