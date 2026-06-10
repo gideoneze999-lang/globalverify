@@ -69,6 +69,15 @@ export const listTwilioNumbersByCountry = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
+export const listAllAvailableTwilioNumbers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { data: rows } = await supabaseAdmin.from("twilio_numbers")
+      .select("id, phone_e164, label, country_iso2")
+      .eq("active", true);
+    return rows ?? [];
+  });
+
 // ---------- Bulk SMS ----------
 export const sendBulkSms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
