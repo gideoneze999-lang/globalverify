@@ -49,13 +49,13 @@ function BuyNumberPage() {
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: (num: any) => addFn({ 
+    mutationFn: (num: any) => provisionFn({ 
       data: { 
-        phone_e164: num.phone_number, 
-        country_iso2: num.iso_country,
-        label: `Twilio ${num.iso_country}`
+        phone_number: num.phone_number, 
+        iso_country: num.iso_country
       } 
     }),
+
     onSuccess: () => {
       toast.success("Phone number successfully provisioned and added to your pool!");
       setSelectedPhone(null);
