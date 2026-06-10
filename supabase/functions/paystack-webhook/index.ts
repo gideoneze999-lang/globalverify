@@ -7,6 +7,26 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+async function verifySignature(body: string, signature: string, secret: string) {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-512" },
+    false,
+    ["verify", "sign"]
+  );
+  const signatureBytes = new Uint8Array(
+    signature.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
+  );
+  return await crypto.subtle.verify(
+    "HMAC",
+    key,
+    signatureBytes,
+    encoder.encode(body)
+  );
+}
+
 serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
@@ -15,30 +35,39 @@ serve(async (req) => {
   try {
     const signature = req.headers.get("x-paystack-signature");
     if (!signature) {
+      console.error("Missing x-paystack-signature header");
       return new Response("No signature", { status: 400 });
     }
 
     const body = await req.text();
     
-    // In a real scenario, you should verify the signature with crypto.subtle or similar
-    // For now, we'll proceed if the secret key is set, but signature verification is recommended.
-    // Paystack signature is HMAC SHA512 of the body using the secret key.
+    // Verify signature
+    if (PAYSTACK_SECRET_KEY) {
+      const isValid = await verifySignature(body, signature, PAYSTACK_SECRET_KEY);
+      if (!isValid) {
+        console.error("Invalid signature");
+        return new Response("Invalid signature", { status: 401 });
+      }
+    } else {
+      console.warn("PAYSTACK_SECRET_KEY not set, skipping signature verification");
+    }
     
     const event = JSON.parse(body);
 
     if (event.event === "charge.success") {
       const { data } = event;
       const amount = data.amount / 100; // Paystack amount is in kobo
-      const email = data.customer.email;
       const reference = data.reference;
-      const userId = data.metadata?.user_id;
+      
+      // Try to get user_id from various metadata locations
+      const userId = data.metadata?.user_id || data.metadata?.custom_fields?.[0]?.value;
 
       if (!userId) {
-        console.error("No user_id in metadata");
+        console.error("No user_id found in metadata:", JSON.stringify(data.metadata));
         return new Response("Missing user_id", { status: 400 });
       }
 
-      // 1. Check if transaction already processed
+      // 1. Check if transaction already processed (idempotency)
       const { data: existingTx } = await supabase
         .from("transactions")
         .select("id")
@@ -46,6 +75,7 @@ serve(async (req) => {
         .maybeSingle();
 
       if (existingTx) {
+        console.log(`Transaction ${reference} already processed`);
         return new Response("Already processed", { status: 200 });
       }
 
@@ -56,7 +86,10 @@ serve(async (req) => {
         .eq("id", userId)
         .single();
 
-      if (profileErr) throw profileErr;
+      if (profileErr) {
+        console.error("Profile fetch error:", profileErr);
+        throw profileErr;
+      }
 
       const newBalance = Number(profile.wallet_balance || 0) + amount;
 
@@ -65,7 +98,10 @@ serve(async (req) => {
         .update({ wallet_balance: newBalance })
         .eq("id", userId);
 
-      if (updateErr) throw updateErr;
+      if (updateErr) {
+        console.error("Balance update error:", updateErr);
+        throw updateErr;
+      }
 
       // 3. Record transaction
       const { error: txErr } = await supabase
@@ -78,17 +114,26 @@ serve(async (req) => {
           meta: { reference, gateway: "paystack", paystack_data: data }
         });
 
-      if (txErr) throw txErr;
+      if (txErr) {
+        console.error("Transaction record error:", txErr);
+        throw txErr;
+      }
       
       // 4. Record deposit
-      await supabase.from("deposits").insert({
+      const { error: depErr } = await supabase.from("deposits").insert({
         user_id: userId,
         amount: amount,
         status: "approved",
         admin_note: `Automated Paystack deposit: ${reference}`
       });
 
-      console.log(`Successfully funded user ${userId} with ${amount}`);
+      if (depErr) {
+        console.error("Deposit record error:", depErr);
+      }
+
+      console.log(`Successfully funded user ${userId} with ${amount}. Ref: ${reference}`);
+    } else {
+      console.log(`Received unhandled event: ${event.event}`);
     }
 
     return new Response("OK", { status: 200 });
