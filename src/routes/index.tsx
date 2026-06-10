@@ -68,9 +68,11 @@ function Nav() {
           <a href="#stats" className="hover:text-foreground transition">Why us</a>
         </nav>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" asChild><Link to="/login">Login</Link></Button>
+          <ThemeToggle />
+          <Button variant="ghost" asChild className="hidden sm:inline-flex"><Link to="/login">Login</Link></Button>
           <Button asChild className="gradient-primary shadow-glow"><Link to="/signup">Get Started</Link></Button>
         </div>
+
       </div>
     </header>
   );
