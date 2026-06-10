@@ -149,9 +149,17 @@ function DashboardLayout() {
 
       {/* Main */}
       <div className="flex-1 min-w-0">
-        <header className="lg:hidden sticky top-0 z-30 h-14 flex items-center px-4 bg-background/80 backdrop-blur-xl border-b border-border/50">
-          <button onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></button>
-          <span className="ml-3 font-semibold">GlobalVerify</span>
+        <header className="sticky top-0 z-30 h-16 flex items-center px-4 lg:px-8 bg-background/60 backdrop-blur-xl border-b border-border/50">
+          <button className="lg:hidden" onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></button>
+          <span className="ml-3 font-semibold lg:hidden">GlobalVerify</span>
+          
+          <div className="ml-auto flex items-center gap-3">
+            <Button variant="outline" size="icon" className="h-9 w-9 rounded-full border-border/40 bg-background/50 backdrop-blur-sm hidden sm:flex">
+              <Bell className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
+            <ThemeToggle />
+          </div>
+
           {isAdmin && (
             <Link to="/admin" className="ml-auto text-xs text-accent flex items-center gap-1">
               <ShieldCheck className="w-4 h-4" /> Admin
