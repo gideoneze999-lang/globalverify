@@ -468,8 +468,8 @@ export const provisionTwilioNumber = createServerFn({ method: "POST" })
       country_iso2: data.iso_country.toUpperCase(),
       label: `Provisioned ${data.iso_country}`,
       active: true,
-      twilio_sid: purchaseJson.sid
-    }).select().single();
+    } as any).select().single();
+
 
     if (error) {
       console.error("Local DB sync error after Twilio purchase:", error);
