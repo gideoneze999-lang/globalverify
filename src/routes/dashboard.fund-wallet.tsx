@@ -93,8 +93,8 @@ function FundWallet() {
             {Number(amount) >= 100 && user?.email ? (
               <PaystackButton
                 className="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gradient-primary shadow-glow h-10 px-4 py-2"
-                {...{
-                  publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "",
+                {...({
+                  publicKey: "pk_live_830caea9935bb31b389ba7ff833f56451239ef4b",
                   email: user.email,
                   amount: Number(amount) * 100,
                   metadata: {
@@ -114,14 +114,13 @@ function FundWallet() {
                     setAmount("");
                     qc.invalidateQueries({ queryKey: ["my-deposits"] });
                     qc.invalidateQueries({ queryKey: ["profile"] });
-                    qc.invalidateQueries({ queryKey: ["settings"] });
                   },
                   onClose: () => toast.info("Payment cancelled"),
-                }}
+                } as any)}
               />
             ) : (
               <Button disabled className="w-full opacity-50 cursor-not-allowed">
-                Enter amount (min 100)
+                {user?.email ? "Enter amount (min 100)" : "Email required for payment"}
               </Button>
             )}
           </div>
