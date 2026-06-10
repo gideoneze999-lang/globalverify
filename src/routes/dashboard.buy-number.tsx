@@ -86,7 +86,7 @@ function BuyNumberPage() {
                   <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Choose a country"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {(countries ?? []).map((c) => (
+                  {(countries ?? []).map((c: any) => (
                     <SelectItem key={c.iso2} value={c.iso2}>
                       {c.name} ({c.iso2})
                     </SelectItem>
