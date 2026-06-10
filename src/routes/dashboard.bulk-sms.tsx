@@ -119,11 +119,6 @@ function BulkSmsPage() {
               <Select value={country} onValueChange={(v) => { setCountry(v); setNumberId(""); }}>
                 <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
                 <SelectContent>
-                  {countriesShown.length === 0 && (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">
-                      No Twilio numbers configured. Ask admin.
-                    </div>
-                  )}
                   {countriesShown.map((c) => (
                     <SelectItem key={c.iso2} value={c.iso2}>
                       {c.flag} {c.name} ({c.dial})
