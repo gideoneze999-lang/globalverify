@@ -28,8 +28,9 @@ function BuyNumberPage() {
 
   const countriesFn = useServerFn(fetchTwilioSupportedCountries);
   const searchFn = useServerFn(searchAvailableTwilioNumbers);
-  const addFn = useServerFn(addTwilioNumber);
+  const provisionFn = useServerFn(provisionTwilioNumber);
   const pricingFn = useServerFn(getMessagingPricing);
+
 
   const { data: countries, isLoading: loadingCountries } = useQuery({
     queryKey: ["twilioCountries"],
