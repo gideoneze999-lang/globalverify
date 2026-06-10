@@ -117,18 +117,51 @@ function BulkSmsPage() {
           </TabsList>
 
           <div className="grid sm:grid-cols-2 gap-4 mt-5">
-            <div>
+            <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium">Country</label>
-              <Select value={country} onValueChange={(v) => { setCountry(v); setNumberId(""); }}>
-                <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
-                <SelectContent>
-                  {countriesShown.map((c) => (
-                    <SelectItem key={c.iso2} value={c.iso2}>
-                      {c.flag} {c.name} ({c.dial})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={countryOpen} onOpenChange={setCountryOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={countryOpen}
+                    className="w-full justify-between font-normal"
+                  >
+                    {country
+                      ? countriesShown.find((c) => c.iso2 === country)?.name
+                      : "Select country..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search country..." />
+                    <CommandList>
+                      <CommandEmpty>No country found.</CommandEmpty>
+                      <CommandGroup>
+                        {countriesShown.map((c) => (
+                          <CommandItem
+                            key={c.iso2}
+                            value={c.name}
+                            onSelect={() => {
+                              setCountry(c.iso2);
+                              setCountryOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                country === c.iso2 ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {c.flag} {c.name} ({c.dial})
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div>
