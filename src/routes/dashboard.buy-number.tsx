@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { 
   fetchTwilioSupportedCountries, 
@@ -12,22 +12,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Phone, Search, Globe, ChevronRight, Hash, AlertCircle } from "lucide-react";
+import { Phone, Search, Globe, ChevronRight, Hash, AlertCircle, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatNGN } from "@/lib/format";
+import { provisionTwilioNumber } from "@/lib/messaging.functions";
+
 
 export const Route = createFileRoute("/dashboard/buy-number")({ component: BuyNumberPage });
 
 function BuyNumberPage() {
+  const qc = useQueryClient();
   const [country, setCountry] = useState("");
+
   const [areaCode, setAreaCode] = useState("");
   const [selectedPhone, setSelectedPhone] = useState<any>(null);
 
   const countriesFn = useServerFn(fetchTwilioSupportedCountries);
   const searchFn = useServerFn(searchAvailableTwilioNumbers);
-  const addFn = useServerFn(addTwilioNumber);
+  const provisionFn = useServerFn(provisionTwilioNumber);
   const pricingFn = useServerFn(getMessagingPricing);
+
 
   const { data: countries, isLoading: loadingCountries } = useQuery({
     queryKey: ["twilioCountries"],
@@ -46,13 +51,13 @@ function BuyNumberPage() {
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: (num: any) => addFn({ 
+    mutationFn: (num: any) => provisionFn({ 
       data: { 
-        phone_e164: num.phone_number, 
-        country_iso2: num.iso_country,
-        label: `Twilio ${num.iso_country}`
+        phone_number: num.phone_number, 
+        iso_country: num.iso_country
       } 
     }),
+
     onSuccess: () => {
       toast.success("Phone number successfully provisioned and added to your pool!");
       setSelectedPhone(null);
@@ -75,9 +80,19 @@ function BuyNumberPage() {
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-6">
           <div className="glass rounded-2xl p-6 space-y-4">
-            <h2 className="font-semibold flex items-center gap-2">
-              <Search className="w-4 h-4" /> Filter Search
+            <h2 className="font-semibold flex items-center justify-between">
+              <span className="flex items-center gap-2"><Search className="w-4 h-4" /> Filter Search</span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8" 
+                onClick={() => qc.invalidateQueries({ queryKey: ["twilioCountries"] })}
+                title="Refresh countries"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
             </h2>
+
             
             <div className="space-y-3">
               <label className="text-sm font-medium">Select Country</label>
