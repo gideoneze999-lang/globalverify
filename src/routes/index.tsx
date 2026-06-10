@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Shield, Zap, Globe2, Lock, CreditCard, Headphones, MessageCircle, Send, Check } from "lucide-react";
+import { Shield, Zap, Globe2, Lock, CreditCard, Headphones, MessageCircle, Send, Check, Bell } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect, useState } from "react";
 import logo from "@/assets/logo.png";
 
